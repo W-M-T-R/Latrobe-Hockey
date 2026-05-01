@@ -16,7 +16,7 @@
       "name": "Junior Varsity",
       "grades": "Grades 9–12",
       "pdfHref": "",
-      "pdfVisible": true,
+      "pdfVisible": false,
       "emptyMessage": "JV schedule coming soon."
     },
     {
