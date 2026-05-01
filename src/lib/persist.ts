@@ -62,11 +62,18 @@ export async function persistImage(filename: string, bytes: Buffer): Promise<{ u
   const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_').toLowerCase();
   const stamp = Date.now();
   const finalName = `${stamp}-${safeName}`;
-  const publicDir = path.resolve(contentDir(), '..', '..', 'public', 'uploads');
-  await fs.mkdir(publicDir, { recursive: true });
-  const localPath = path.join(publicDir, finalName);
-  await fs.writeFile(localPath, bytes);
   const urlPath = `/uploads/${finalName}`;
+
+  // Best-effort local write so dev mode serves the file immediately. On Netlify
+  // the function FS is read-only — that's fine, GitHub commit below is the source of truth.
+  try {
+    const publicDir = path.resolve(contentDir(), '..', '..', 'public', 'uploads');
+    await fs.mkdir(publicDir, { recursive: true });
+    await fs.writeFile(path.join(publicDir, finalName), bytes);
+  } catch (e: any) {
+    if (e.code !== 'EROFS' && e.code !== 'EACCES' && e.code !== 'ENOENT') throw e;
+  }
+
   if (!ghEnabled()) return { url: urlPath, via: 'local' };
   const b64 = bytes.toString('base64');
   const repoPath = joinRepoPath(GH.pathPrefix, `public/uploads/${finalName}`);
