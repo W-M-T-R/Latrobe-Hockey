@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { loadContent } from '../lib/content';
+
+const contact = await loadContent<any>('contact');
+---
+<BaseLayout title="Contact" description="Contact the Greater Latrobe Hockey Club board of directors.">
+  <PageHero eyebrow={contact.hero.eyebrow} title={contact.hero.title} subtitle={contact.hero.subtitle} />
+
+  <section class="section">
+    <div class="container-x">
+      <div class="grid sm:grid-cols-2 gap-5">
+        {contact.board.map((person: any) => (
+          <div class="card card-hover">
+            <div class="text-xs uppercase tracking-[0.3em] text-wildcat-orange">{person.role}</div>
+            <div class="mt-2 font-display text-3xl tracking-wide">{person.name}</div>
+            <div class="mt-5 space-y-2 text-sm">
+              {person.email && (
+                <a href={`mailto:${person.email}`} class="flex items-center gap-3 text-white/80 hover:text-wildcat-orange transition">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                  {person.email}
+                </a>
+              )}
+              {person.phone && (
+                <a href={`tel:${person.phone.replace(/[^0-9+]/g,'')}`} class="flex items-center gap-3 text-white/80 hover:text-wildcat-orange transition">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/></svg>
+                  {person.phone}
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-10 card flex flex-col md:flex-row gap-6 items-start md:items-center">
+        <div class="h-14 w-14 rounded-2xl bg-wildcat-orange/15 text-wildcat-orange flex items-center justify-center shrink-0">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="flex-1">
+          <div class="text-xs uppercase tracking-[0.3em] text-wildcat-orange mb-1">{contact.mailing.title}</div>
+          <address class="not-italic font-display text-2xl tracking-wide leading-tight">
+            {contact.mailing.lines.map((l: string) => (<div>{l}</div>))}
+          </address>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

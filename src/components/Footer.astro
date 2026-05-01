@@ -1,0 +1,44 @@
+---
+import { loadContent } from '../lib/content';
+const site = await loadContent<any>('site');
+const year = new Date().getFullYear();
+---
+<footer class="border-t border-white/10 bg-wildcat-black/80">
+  <div class="container-x py-12 grid gap-y-10 gap-x-16 md:grid-cols-[1fr,1.2fr,1fr]">
+    <div>
+      <div class="flex items-center gap-3">
+        <img src={site.logo} alt="Latrobe Wildcats logo" class="h-12 w-12 rounded-full ring-2 ring-wildcat-orange/60" />
+        <div>
+          <div class="font-display text-xl tracking-wide">Latrobe Wildcats</div>
+          <div class="text-[11px] uppercase tracking-[0.3em] text-white/40 mt-1">Hockey Club</div>
+        </div>
+      </div>
+      <p class="mt-4 text-sm text-white/60 max-w-xs">{site.footerNote}</p>
+    </div>
+
+    <div>
+      <h4 class="text-sm font-semibold uppercase tracking-widest text-white/50 mb-4">Quick Links</h4>
+      <ul class="grid grid-cols-2 sm:grid-cols-4 gap-x-5 gap-y-2 text-sm max-w-md">
+        {site.nav.map((item: any) => (
+          <li><a href={item.href} class="text-white/80 hover:text-wildcat-orange transition">{item.label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <h4 class="text-sm font-semibold uppercase tracking-widest text-white/50 mb-4">Mailing Address</h4>
+      <address class="not-italic text-sm text-white/80 leading-relaxed">
+        Greater Latrobe Hockey Club<br/>
+        P.O. Box 8<br/>
+        Latrobe, PA 15650
+      </address>
+      <a href="/admin" class="mt-6 inline-block text-xs uppercase tracking-widest text-white/40 hover:text-wildcat-orange">Admin login →</a>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="container-x py-5 flex flex-col sm:flex-row justify-between gap-2 text-xs text-white/40">
+      <span>© {year} {site.name}. All rights reserved.</span>
+      <span>Established {site.established} · Greater Latrobe Senior High School</span>
+    </div>
+  </div>
+</footer>

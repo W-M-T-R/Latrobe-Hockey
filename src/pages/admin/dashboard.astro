@@ -1,0 +1,556 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { loadContent } from '../../lib/content';
+import { DOCUMENTS, HOMEPAGE_SLOTS, getByDot, type Document } from '../../lib/documents';
+import { persistMode } from '../../lib/persist';
+
+// Pre-load every page that documents reference so we can show what's currently set.
+const pageData: Record<string, any> = {
+  home: await loadContent<any>('home'),
+  forms: await loadContent<any>('forms'),
+  about: await loadContent<any>('about'),
+  rosters: await loadContent<any>('rosters'),
+  schedules: await loadContent<any>('schedules'),
+  calendar: await loadContent<any>('calendar'),
+};
+
+// For each document, peek at its first ref to find its current URL,
+// and (for docs with visibility toggles) read the current visible flag.
+const docState = DOCUMENTS.map((d: Document) => {
+  const firstRef = d.refs[0]!;
+  const current = (getByDot(pageData[firstRef.page], firstRef.dot) ?? '').toString();
+  let pdfVisible: boolean | null = null;
+  if (d.visibilityRef) {
+    const v = getByDot(pageData[d.visibilityRef.page], d.visibilityRef.dot);
+    pdfVisible = v !== false; // default to true if undefined
+  }
+  return { ...d, current, pdfVisible };
+});
+
+const docsSeason = docState.filter((d) => d.group === 'season');
+const docsStanding = docState.filter((d) => d.group === 'standing');
+
+// Current visibility of homepage quickLinks
+const homeLinks = pageData.home.quickLinks ?? [];
+const slotState = HOMEPAGE_SLOTS.map((s) => ({
+  ...s,
+  link: homeLinks[s.quickLinkIndex] ?? null,
+  visible: homeLinks[s.quickLinkIndex]?.visible !== false,
+}));
+
+const mode = persistMode();
+---
+<AdminLayout title="Dashboard">
+  <section class="container-x py-10 max-w-5xl">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="accent-bar"></span>
+      <span class="text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Welcome</span>
+    </div>
+    <h1 class="font-display text-4xl sm:text-5xl uppercase leading-tight">What would you like to do?</h1>
+
+    <div class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs">
+      <span class="h-2 w-2 rounded-full" style={`background: ${mode === 'github' ? '#22c55e' : '#f59e0b'}`}></span>
+      <span class="text-white/80">
+        Saves go to <strong>{mode === 'github' ? 'the live website (auto-deploy)' : 'local files (dev mode)'}</strong>
+      </span>
+    </div>
+
+    <div id="status" class="mt-6 hidden rounded-xl border px-4 py-3 text-sm"></div>
+
+    <!-- DOCUMENTS -->
+    <section class="mt-10">
+      <h2 class="font-display text-2xl uppercase tracking-wide flex items-center gap-3">
+        <span>📁</span> Replace a Document
+      </h2>
+      <p class="mt-2 text-white/80">Drop a PDF on a row to replace it everywhere on the site. Or click <strong>Choose file</strong>.</p>
+
+      <h3 class="mt-7 text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Season Documents</h3>
+      <p class="mt-1 text-sm text-white/60">Update these whenever a new packet, schedule, or roster comes in.</p>
+      <div class="mt-4 space-y-3" data-doc-list>
+        {docsSeason.map((d) => (
+          <div class="doc-row card !p-5 flex flex-col sm:flex-row gap-4 sm:items-center" data-doc-id={d.id} data-has-visibility={d.visibilityRef ? 'true' : 'false'}>
+            <div class="flex-1 min-w-0">
+              <div class="font-display text-xl tracking-wide">{d.label}</div>
+              {d.description && <div class="text-sm text-white/70 mt-0.5">{d.description}</div>}
+              <div class="doc-current mt-2 text-xs text-white/60 truncate">
+                {d.current ? (
+                  <span>Current: <a href={d.current} target="_blank" rel="noopener" class="text-wildcat-orange hover:underline truncate inline-block max-w-md align-bottom">{d.current.split('/').pop()?.split('?')[0] || d.current}</a></span>
+                ) : (
+                  <span class="text-white/50">No file uploaded yet.</span>
+                )}
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 shrink-0 items-center">
+              {d.visibilityRef && (
+                <button type="button"
+                        class:list={[
+                          'visibility-chip rounded-full px-3 py-1.5 text-xs font-semibold border transition whitespace-nowrap cursor-pointer',
+                          d.pdfVisible
+                            ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/20'
+                            : 'border-amber-400/50 bg-amber-400/15 text-amber-300 hover:bg-amber-400/25'
+                        ]}
+                        data-visible={d.pdfVisible ? 'true' : 'false'}
+                        data-visibility-page={d.visibilityPage}
+                        title={`Toggle whether the PDF download card is shown on the ${d.visibilityPage} page.`}>
+                  {d.pdfVisible ? `👁 Showing on ${d.visibilityPage}` : `🙈 Hidden on ${d.visibilityPage}`}
+                </button>
+              )}
+              <button class="doc-replace-btn btn-primary !py-2 !px-4 !text-xs whitespace-nowrap">📎 Choose file</button>
+              <input type="file" accept="image/*,application/pdf,.pdf" class="doc-file hidden" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h3 class="mt-10 text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Standing Documents</h3>
+      <p class="mt-1 text-sm text-white/60">These rarely change. Update when policies are revised.</p>
+      <div class="mt-4 space-y-3" data-doc-list>
+        {docsStanding.map((d) => (
+          <div class="doc-row card !p-5 flex flex-col sm:flex-row gap-4 sm:items-center" data-doc-id={d.id} data-has-visibility={d.visibilityRef ? 'true' : 'false'}>
+            <div class="flex-1 min-w-0">
+              <div class="font-display text-xl tracking-wide">{d.label}</div>
+              {d.description && <div class="text-sm text-white/70 mt-0.5">{d.description}</div>}
+              <div class="doc-current mt-2 text-xs text-white/60 truncate">
+                {d.current ? (
+                  <span>Current: <a href={d.current} target="_blank" rel="noopener" class="text-wildcat-orange hover:underline truncate inline-block max-w-md align-bottom">{d.current.split('/').pop()?.split('?')[0] || d.current}</a></span>
+                ) : (
+                  <span class="text-white/50">No file uploaded yet.</span>
+                )}
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 shrink-0 items-center">
+              {d.visibilityRef && (
+                <button type="button"
+                        class:list={[
+                          'visibility-chip rounded-full px-3 py-1.5 text-xs font-semibold border transition whitespace-nowrap cursor-pointer',
+                          d.pdfVisible
+                            ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-300 hover:bg-emerald-400/20'
+                            : 'border-amber-400/50 bg-amber-400/15 text-amber-300 hover:bg-amber-400/25'
+                        ]}
+                        data-visible={d.pdfVisible ? 'true' : 'false'}
+                        data-visibility-page={d.visibilityPage}
+                        title={`Toggle whether the PDF download card is shown on the ${d.visibilityPage} page.`}>
+                  {d.pdfVisible ? `👁 Showing on ${d.visibilityPage}` : `🙈 Hidden on ${d.visibilityPage}`}
+                </button>
+              )}
+              <button class="doc-replace-btn btn-primary !py-2 !px-4 !text-xs whitespace-nowrap">📎 Choose file</button>
+              <input type="file" accept="image/*,application/pdf,.pdf" class="doc-file hidden" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- SEASONAL TRANSITIONS -->
+    <section class="mt-14">
+      <h2 class="font-display text-2xl uppercase tracking-wide flex items-center gap-3">
+        <span>🔁</span> Seasonal Transitions
+      </h2>
+      <p class="mt-2 text-white/80">Big seasonal switches in one click — with confirmations so nothing happens by accident.</p>
+
+      <div class="mt-6 grid md:grid-cols-2 gap-5">
+        <!-- SUMMER -->
+        <div class="card !p-7 border-amber-400/30 bg-gradient-to-br from-amber-500/[0.08] to-transparent">
+          <div class="flex items-start gap-4">
+            <span class="h-14 w-14 rounded-2xl bg-amber-400/15 text-amber-300 flex items-center justify-center text-3xl shrink-0">☀️</span>
+            <div class="flex-1">
+              <h3 class="font-display text-2xl tracking-wide">Start Summer Mode</h3>
+              <div class="text-xs uppercase tracking-[0.25em] text-amber-300/80 mt-1">Run in May, end of school year</div>
+            </div>
+          </div>
+          <p class="mt-5 text-white/85 leading-relaxed">
+            Begin the new season cycle. <strong class="text-amber-200">Clears last season's rosters, schedules, and calendar</strong> so those pages show <em>"Coming Soon."</em> Walks you through uploading the new Registration Packet and Summer Ice Schedule, then switches the homepage to summer mode.
+          </p>
+          <button id="open-summer" class="mt-6 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-semibold uppercase tracking-wider text-sm bg-amber-400 text-wildcat-black hover:bg-amber-300 transition">
+            Begin Summer Setup →
+          </button>
+        </div>
+
+        <!-- SEASON -->
+        <div class="card !p-7 border-cyan-400/30 bg-gradient-to-br from-cyan-500/[0.08] to-transparent">
+          <div class="flex items-start gap-4">
+            <span class="h-14 w-14 rounded-2xl bg-cyan-400/15 text-cyan-300 flex items-center justify-center text-3xl shrink-0">🏒</span>
+            <div class="flex-1">
+              <h3 class="font-display text-2xl tracking-wide">Switch To Season Mode</h3>
+              <div class="text-xs uppercase tracking-[0.25em] text-cyan-300/80 mt-1">When PIHL drops schedules</div>
+            </div>
+          </div>
+          <p class="mt-5 text-white/85 leading-relaxed">
+            Schedules are in. Swap the homepage cards from registration paperwork to <strong class="text-cyan-200">Rosters and team Schedules</strong>. Doesn't delete anything — just changes what's shown on the homepage.
+          </p>
+          <button id="open-season" class="mt-6 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-semibold uppercase tracking-wider text-sm bg-cyan-400 text-wildcat-black hover:bg-cyan-300 transition">
+            Switch Now →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- INDIVIDUAL VISIBILITY (kept for fine-grained tweaks) -->
+    <section class="mt-12">
+      <details class="card !p-5 group">
+        <summary class="cursor-pointer flex items-center justify-between list-none">
+          <div>
+            <h3 class="font-display text-xl tracking-wide">Or pick individual cards yourself</h3>
+            <p class="mt-1 text-sm text-white/70">Manually choose which cards appear under <em>Players & Parents Start Here</em>.</p>
+          </div>
+          <span class="text-wildcat-orange text-sm group-open:rotate-90 transition">▶</span>
+        </summary>
+        <div id="visibility-list" class="mt-5 space-y-2">
+          {slotState.map((s) => (
+            <label class="card !p-4 !bg-black/30 flex items-center gap-4 cursor-pointer hover:border-wildcat-orange/50 transition" data-slot-index={s.quickLinkIndex} data-slot-doc={s.documentId}>
+              <input type="checkbox" class="visibility-cb h-5 w-5 accent-wildcat-orange" checked={s.visible} />
+              <div class="flex-1">
+                <div class="font-semibold">{s.link?.title ?? '(unnamed)'}</div>
+                <div class="text-xs text-white/60 mt-0.5">{s.link?.blurb ?? ''}</div>
+              </div>
+              <span class="text-xs text-white/40">slot {s.quickLinkIndex + 1}</span>
+            </label>
+          ))}
+        </div>
+        <button id="save-visibility" class="btn-primary mt-5 !text-sm">Save homepage changes</button>
+      </details>
+    </section>
+
+    <!-- ============= SUMMER WIZARD DIALOG ============= -->
+    <dialog id="summer-dialog" class="bg-wildcat-ink text-white rounded-3xl border border-amber-400/30 max-w-xl w-[94vw] p-0 backdrop:bg-black/70 backdrop:backdrop-blur-sm">
+      <div class="p-7 border-b border-white/10 bg-gradient-to-br from-amber-500/[0.08] to-transparent rounded-t-3xl">
+        <div class="flex items-center gap-3">
+          <span class="h-10 w-10 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center text-xl">☀️</span>
+          <h3 class="font-display text-2xl tracking-wide">Start Summer Mode</h3>
+        </div>
+        <p class="mt-3 text-sm text-white/80">Three quick steps to start the new season cycle.</p>
+      </div>
+
+      <div class="p-7 max-h-[65vh] overflow-y-auto space-y-7">
+        <div>
+          <div class="text-xs uppercase tracking-[0.25em] text-amber-300 mb-2">Step 1 · Optional</div>
+          <label class="block text-sm font-semibold mb-2">New Registration Packet</label>
+          <input type="file" id="summer-packet-file" accept="application/pdf,.pdf,image/*" class="w-full text-sm" />
+          <div id="summer-packet-status" class="mt-1 text-xs text-white/60">If you have it — drop or pick the new packet PDF. Otherwise skip.</div>
+        </div>
+
+        <div>
+          <div class="text-xs uppercase tracking-[0.25em] text-amber-300 mb-2">Step 2 · Optional</div>
+          <label class="block text-sm font-semibold mb-2">New Summer Ice Schedule</label>
+          <input type="file" id="summer-ice-file" accept="application/pdf,.pdf,image/*" class="w-full text-sm" />
+          <div id="summer-ice-status" class="mt-1 text-xs text-white/60">Skip if you don't have it yet — you can upload it later from the Documents list.</div>
+        </div>
+
+        <div class="rounded-2xl border border-amber-400/40 bg-amber-400/5 p-5">
+          <div class="text-xs uppercase tracking-[0.25em] text-amber-300 mb-2">Step 3 · Confirm</div>
+          <p class="text-sm text-white/90 leading-relaxed">
+            <strong>Switching to summer mode will clear last season's:</strong>
+          </p>
+          <ul class="mt-2 text-sm text-white/85 space-y-1 list-disc list-inside">
+            <li>Team Rosters PDF</li>
+            <li>All three team Schedule PDFs (Varsity, JV, Middle School)</li>
+            <li>Season Calendar PDF</li>
+          </ul>
+          <p class="mt-3 text-sm text-white/80">Those pages will show <em>"Coming Soon"</em> until you upload new ones. The homepage will switch to show the Registration Packet + Summer Ice Schedule cards.</p>
+          <label class="mt-4 flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="summer-confirm" class="mt-1 h-5 w-5 accent-amber-400 shrink-0" />
+            <span class="text-sm text-white/90">Yes, I want to clear last season's rosters, schedules, and calendar.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="p-5 flex items-center justify-end gap-3 border-t border-white/10 bg-black/30 rounded-b-3xl">
+        <button id="summer-cancel" type="button" class="btn-ghost !text-sm">Cancel</button>
+        <button id="summer-go" type="button" disabled
+                class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-semibold uppercase tracking-wider text-sm bg-amber-400 text-wildcat-black hover:bg-amber-300 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed transition">
+          Switch to Summer Mode
+        </button>
+      </div>
+    </dialog>
+
+    <!-- ============= SEASON WIZARD DIALOG ============= -->
+    <dialog id="season-dialog" class="bg-wildcat-ink text-white rounded-3xl border border-cyan-400/30 max-w-xl w-[94vw] p-0 backdrop:bg-black/70 backdrop:backdrop-blur-sm">
+      <div class="p-7 border-b border-white/10 bg-gradient-to-br from-cyan-500/[0.08] to-transparent rounded-t-3xl">
+        <div class="flex items-center gap-3">
+          <span class="h-10 w-10 rounded-xl bg-cyan-400/20 text-cyan-300 flex items-center justify-center text-xl">🏒</span>
+          <h3 class="font-display text-2xl tracking-wide">Switch to Season Mode</h3>
+        </div>
+        <p class="mt-3 text-sm text-white/80">The homepage will swap from registration cards to roster + schedule cards.</p>
+      </div>
+
+      <div class="p-7 max-h-[65vh] overflow-y-auto space-y-5">
+        <div>
+          <div class="text-xs uppercase tracking-[0.25em] text-cyan-300 mb-3">Status of season documents</div>
+          <ul id="season-status" class="space-y-2 text-sm"></ul>
+          <p class="mt-3 text-xs text-white/60">Cards with no PDF uploaded won't appear on the homepage even after switching — so it's safe to switch and upload later.</p>
+        </div>
+        <div class="rounded-2xl border border-cyan-400/40 bg-cyan-400/5 p-5">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="season-confirm" class="mt-1 h-5 w-5 accent-cyan-400 shrink-0" />
+            <span class="text-sm text-white/90">Yes, switch the homepage to season mode now.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="p-5 flex items-center justify-end gap-3 border-t border-white/10 bg-black/30 rounded-b-3xl">
+        <button id="season-cancel" type="button" class="btn-ghost !text-sm">Cancel</button>
+        <button id="season-go" type="button" disabled
+                class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-semibold uppercase tracking-wider text-sm bg-cyan-400 text-wildcat-black hover:bg-cyan-300 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed transition">
+          Switch to Season Mode
+        </button>
+      </div>
+    </dialog>
+
+    <!-- ADVANCED -->
+    <section class="mt-14 border-t border-white/10 pt-8">
+      <a href="/admin/advanced" class="card card-hover !p-5 flex items-center gap-4 group">
+        <span class="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center text-2xl">⚙️</span>
+        <div class="flex-1">
+          <div class="font-display text-xl tracking-wide">Advanced editing</div>
+          <div class="text-sm text-white/70 mt-0.5">Edit text, headlines, board members, button labels — full control of every page.</div>
+        </div>
+        <span class="text-wildcat-orange text-sm group-hover:translate-x-1 transition">→</span>
+      </a>
+    </section>
+  </section>
+
+  <script id="initial-home" type="application/json" set:html={JSON.stringify(pageData.home)}></script>
+  <script id="season-docs-data" type="application/json" set:html={JSON.stringify(docsSeason.filter((d: any) => ['rosters','schedule-varsity','schedule-jv','schedule-ms','calendar'].includes(d.id)).map((d: any) => ({id: d.id, label: d.label, current: d.current})))}></script>
+  <script>
+    type HomeData = any;
+    const $status = document.getElementById('status') as HTMLDivElement;
+    function showStatus(kind: 'ok' | 'error' | 'info', msg: string) {
+      $status.classList.remove('hidden', 'border-green-500/40', 'bg-green-500/10', 'text-green-200',
+        'border-red-500/40', 'bg-red-500/10', 'text-red-200',
+        'border-white/15', 'bg-white/5', 'text-white/85');
+      const cls = kind === 'ok' ? ['border-green-500/40','bg-green-500/10','text-green-200']
+        : kind === 'error' ? ['border-red-500/40','bg-red-500/10','text-red-200']
+        : ['border-white/15','bg-white/5','text-white/85'];
+      $status.classList.add(...cls);
+      $status.textContent = msg;
+    }
+
+    // ---- Visibility chip (Show/Hide on page) ----
+    document.querySelectorAll<HTMLDivElement>('.doc-row').forEach((row) => {
+      const chip = row.querySelector<HTMLButtonElement>('.visibility-chip');
+      if (!chip) return;
+      const docId = row.dataset.docId!;
+      const page = chip.dataset.visibilityPage ?? 'page';
+      chip.addEventListener('click', async () => {
+        const currentlyVisible = chip.dataset.visible === 'true';
+        const next = !currentlyVisible;
+        chip.disabled = true;
+        const orig = chip.textContent;
+        chip.textContent = next ? '👁 Showing…' : '🙈 Hiding…';
+        try {
+          const res = await fetch('/api/admin/document-visibility', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ documentId: docId, visible: next }),
+          });
+          const j = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(j.error || 'visibility update failed');
+          // Apply new state to chip
+          chip.dataset.visible = next ? 'true' : 'false';
+          chip.textContent = next ? `👁 Showing on ${page}` : `🙈 Hidden on ${page}`;
+          chip.classList.toggle('border-emerald-400/40', next);
+          chip.classList.toggle('bg-emerald-400/10', next);
+          chip.classList.toggle('text-emerald-300', next);
+          chip.classList.toggle('hover:bg-emerald-400/20', next);
+          chip.classList.toggle('border-amber-400/50', !next);
+          chip.classList.toggle('bg-amber-400/15', !next);
+          chip.classList.toggle('text-amber-300', !next);
+          chip.classList.toggle('hover:bg-amber-400/25', !next);
+          showStatus('ok', next ? `Now showing on ${page}.` : `Hidden on ${page} — visitors will see "Coming Soon."`);
+        } catch (e: any) {
+          chip.textContent = orig;
+          showStatus('error', e.message || 'Could not update visibility.');
+        } finally {
+          chip.disabled = false;
+        }
+      });
+    });
+
+    // ---- Document replace (per-row choose / drag-drop) ----
+    document.querySelectorAll<HTMLDivElement>('.doc-row').forEach((row) => {
+      const docId = row.dataset.docId!;
+      const btn = row.querySelector<HTMLButtonElement>('.doc-replace-btn')!;
+      const fileInput = row.querySelector<HTMLInputElement>('.doc-file')!;
+
+      btn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', () => {
+        const f = fileInput.files?.[0];
+        if (f) doUpload(docId, f, row, btn);
+      });
+
+      // Drag and drop right onto the row
+      row.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        row.classList.add('!border-wildcat-orange', 'bg-wildcat-orange/5');
+      });
+      row.addEventListener('dragleave', () => {
+        row.classList.remove('!border-wildcat-orange', 'bg-wildcat-orange/5');
+      });
+      row.addEventListener('drop', (e) => {
+        e.preventDefault();
+        row.classList.remove('!border-wildcat-orange', 'bg-wildcat-orange/5');
+        const f = e.dataTransfer?.files?.[0];
+        if (f) doUpload(docId, f, row, btn);
+      });
+    });
+
+    async function doUpload(documentId: string, file: File, row: HTMLDivElement, btn: HTMLButtonElement) {
+      const orig = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Uploading…';
+      showStatus('info', `Uploading ${file.name}…`);
+      try {
+        const fd = new FormData();
+        fd.append('documentId', documentId);
+        fd.append('file', file);
+        const res = await fetch('/api/admin/document-replace', { method: 'POST', body: fd });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(j.error || 'upload failed');
+        showStatus('ok', `Saved! "${file.name}" is now the ${row.querySelector('.font-display')?.textContent}. ${j.via === 'github' ? 'Live site updates in ~30 seconds.' : ''}`);
+        // Update the "Current:" line inline
+        const cur = row.querySelector('.text-white\\/60.truncate, .text-white\\/60');
+        if (cur) cur.innerHTML = `Current: <a href="${j.url}" target="_blank" rel="noopener" class="text-wildcat-orange hover:underline">${file.name}</a>`;
+      } catch (e: any) {
+        showStatus('error', e.message || 'Upload failed.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
+    }
+
+    // ---- Homepage visibility toggles ----
+    const homeData: HomeData = JSON.parse(document.getElementById('initial-home')!.textContent!);
+    const cbs = Array.from(document.querySelectorAll<HTMLInputElement>('.visibility-cb'));
+    const labels = Array.from(document.querySelectorAll<HTMLLabelElement>('#visibility-list > label'));
+
+    document.getElementById('save-visibility')?.addEventListener('click', async () => {
+      // Apply checkbox state into homeData.quickLinks[*].visible
+      labels.forEach((label) => {
+        const idx = Number(label.dataset.slotIndex);
+        const cb = label.querySelector<HTMLInputElement>('.visibility-cb')!;
+        if (homeData.quickLinks[idx]) homeData.quickLinks[idx].visible = cb.checked;
+      });
+      showStatus('info', 'Saving…');
+      try {
+        const res = await fetch('/api/admin/save/home', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(homeData),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(j.error || 'save failed');
+        showStatus('ok', `Homepage updated. ${j.via === 'github' ? 'Live site updates in ~30 seconds.' : ''}`);
+      } catch (e: any) {
+        showStatus('error', e.message || 'Save failed.');
+      }
+    });
+
+    // ===== SUMMER WIZARD =====
+    const $summerDialog = document.getElementById('summer-dialog') as HTMLDialogElement;
+    const $summerCb = document.getElementById('summer-confirm') as HTMLInputElement;
+    const $summerGo = document.getElementById('summer-go') as HTMLButtonElement;
+    const $summerCancel = document.getElementById('summer-cancel') as HTMLButtonElement;
+    const $summerOpen = document.getElementById('open-summer') as HTMLButtonElement;
+    const $summerPacket = document.getElementById('summer-packet-file') as HTMLInputElement;
+    const $summerIce = document.getElementById('summer-ice-file') as HTMLInputElement;
+    const $summerPacketStatus = document.getElementById('summer-packet-status') as HTMLDivElement;
+    const $summerIceStatus = document.getElementById('summer-ice-status') as HTMLDivElement;
+
+    $summerOpen?.addEventListener('click', () => {
+      $summerCb.checked = false; $summerGo.disabled = true;
+      $summerPacket.value = ''; $summerIce.value = '';
+      $summerDialog.showModal();
+    });
+    $summerCancel?.addEventListener('click', () => $summerDialog.close());
+    $summerCb?.addEventListener('change', () => { $summerGo.disabled = !$summerCb.checked; });
+
+    async function uploadDoc(documentId: string, file: File): Promise<string> {
+      const fd = new FormData();
+      fd.append('documentId', documentId);
+      fd.append('file', file);
+      const res = await fetch('/api/admin/document-replace', { method: 'POST', body: fd });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error || `upload failed for ${documentId}`);
+      return j.url;
+    }
+
+    $summerGo?.addEventListener('click', async () => {
+      $summerGo.disabled = true;
+      const orig = $summerGo.textContent;
+      try {
+        if ($summerPacket.files?.[0]) {
+          $summerPacketStatus.textContent = `Uploading ${$summerPacket.files[0].name}…`;
+          await uploadDoc('registration-packet', $summerPacket.files[0]);
+          $summerPacketStatus.textContent = `✓ Uploaded.`;
+        }
+        if ($summerIce.files?.[0]) {
+          $summerIceStatus.textContent = `Uploading ${$summerIce.files[0].name}…`;
+          await uploadDoc('summer-ice-schedule', $summerIce.files[0]);
+          $summerIceStatus.textContent = `✓ Uploaded.`;
+        }
+        $summerGo.textContent = 'Switching…';
+        const res = await fetch('/api/admin/transition', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ action: 'switch-to-summer' }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(j.error || 'transition failed');
+        $summerDialog.close();
+        showStatus('ok', `🌞 Summer mode active. Last season's rosters/schedules/calendar cleared. ${j.via === 'github' ? 'Live site updating…' : ''}`);
+        setTimeout(() => location.reload(), 1500);
+      } catch (e: any) {
+        showStatus('error', e.message || 'Summer transition failed.');
+        $summerGo.disabled = false;
+        $summerGo.textContent = orig;
+      }
+    });
+
+    // ===== SEASON WIZARD =====
+    const $seasonDialog = document.getElementById('season-dialog') as HTMLDialogElement;
+    const $seasonCb = document.getElementById('season-confirm') as HTMLInputElement;
+    const $seasonGo = document.getElementById('season-go') as HTMLButtonElement;
+    const $seasonCancel = document.getElementById('season-cancel') as HTMLButtonElement;
+    const $seasonOpen = document.getElementById('open-season') as HTMLButtonElement;
+    const $seasonStatus = document.getElementById('season-status') as HTMLUListElement;
+
+    const seasonDocs: Array<{id: string; label: string; current: string}> = JSON.parse(document.getElementById('season-docs-data')?.textContent || '[]');
+
+    $seasonOpen?.addEventListener('click', () => {
+      $seasonCb.checked = false; $seasonGo.disabled = true;
+      $seasonStatus.innerHTML = '';
+      seasonDocs.forEach((d) => {
+        const li = document.createElement('li');
+        const ok = !!d.current;
+        li.className = 'flex items-center gap-3';
+        li.innerHTML = `<span class="${ok ? 'text-emerald-400' : 'text-amber-400'}">${ok ? '✓' : '⚠'}</span><span class="${ok ? 'text-white/85' : 'text-white/70'}">${d.label}</span><span class="ml-auto text-xs ${ok ? 'text-emerald-400/80' : 'text-amber-400/80'}">${ok ? 'uploaded' : 'not uploaded'}</span>`;
+        $seasonStatus.appendChild(li);
+      });
+      $seasonDialog.showModal();
+    });
+    $seasonCancel?.addEventListener('click', () => $seasonDialog.close());
+    $seasonCb?.addEventListener('change', () => { $seasonGo.disabled = !$seasonCb.checked; });
+
+    $seasonGo?.addEventListener('click', async () => {
+      $seasonGo.disabled = true;
+      const orig = $seasonGo.textContent;
+      $seasonGo.textContent = 'Switching…';
+      try {
+        const res = await fetch('/api/admin/transition', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ action: 'switch-to-season' }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(j.error || 'transition failed');
+        $seasonDialog.close();
+        showStatus('ok', `🏒 Season mode active. Homepage now shows rosters and schedules.`);
+        setTimeout(() => location.reload(), 1500);
+      } catch (e: any) {
+        showStatus('error', e.message || 'Season transition failed.');
+        $seasonGo.disabled = false;
+        $seasonGo.textContent = orig;
+      }
+    });
+  </script>
+</AdminLayout>

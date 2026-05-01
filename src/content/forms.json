@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "eyebrow": "Forms",
+    "title": "Registration & Forms",
+    "subtitle": "Everything you need to register, try out, and play this season."
+  },
+  "intro": "Below are the official registration documents and supporting forms for the upcoming season. The 2025–2026 Registration Packet contains every form a player and parent needs.",
+  "primary": [
+    {
+      "title": "Registration Packet 2025–2026",
+      "blurb": "All player and parent forms in one PDF.",
+      "href": "https://nebula.wsimg.com/df5a493fb36917ae85992a14373c49cd?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1",
+      "kind": "PDF",
+      "icon": "clipboard"
+    },
+    {
+      "title": "Summer Ice Schedule",
+      "blurb": "Dates, times, and locations.",
+      "href": "https://nebula.wsimg.com/6d58f717406b464740610a13fdf6d569?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1",
+      "kind": "PDF",
+      "icon": "sun"
+    }
+  ],
+  "packetPdfHref": "https://nebula.wsimg.com/df5a493fb36917ae85992a14373c49cd?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1",
+  "packetIncludes": [
+    {
+      "label": "Registration Cover Letter",
+      "page": "2"
+    },
+    {
+      "label": "Player Registration & Code of Conduct",
+      "page": "5"
+    },
+    {
+      "label": "Consent and Photo Release",
+      "page": "7"
+    },
+    {
+      "label": "Student Handbook Acknowledgement",
+      "page": "9"
+    },
+    {
+      "label": "Physical Examination Form",
+      "page": "10"
+    },
+    {
+      "label": "Summer Ice Schedule",
+      "page": "19"
+    },
+    {
+      "label": "Locker Room & Social Media Policies",
+      "page": "20"
+    },
+    {
+      "label": "Parent Code of Conduct",
+      "page": "23"
+    },
+    {
+      "label": "Golf Outing Information",
+      "page": "24"
+    },
+    {
+      "label": "Advertising Book Details",
+      "page": "26"
+    },
+    {
+      "label": "Picture Packet (Timeless Event Photography)",
+      "page": "28"
+    }
+  ],
+  "policies": [
+    {
+      "title": "GLHC Locker Room Policy",
+      "href": "https://nebula.wsimg.com/502c807e4526171d5586db56811c8e59?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1"
+    },
+    {
+      "title": "Lucky Lottery Calendar Fundraiser",
+      "href": "https://nebula.wsimg.com/90073b953484e73be17454a78a12cd9a?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1"
+    },
+    {
+      "title": "USA Hockey SafeSport Program",
+      "href": "http://www.usahockey.com/page/show/908023-usa-hockey-safesport-program"
+    },
+    {
+      "title": "GLHC By-Laws",
+      "href": "https://nebula.wsimg.com/edd12dfcf54aa159c8fd5269d4e8cff0?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1"
+    }
+  ]
+}

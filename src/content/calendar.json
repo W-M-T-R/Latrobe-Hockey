@@ -1,0 +1,12 @@
+{
+  "hero": {
+    "eyebrow": "Calendar",
+    "title": "Season Calendar",
+    "subtitle": "Practices, games, fundraisers, and team events."
+  },
+  "pdfHref": "",
+  "pdfVisible": true,
+  "pdfTitle": "Season Calendar",
+  "pdfBlurb": "Full season at a glance — practices, games, and key dates.",
+  "emptyMessage": "The full calendar will be posted here. In the meantime, see the Forms page for the Summer Ice Schedule."
+}

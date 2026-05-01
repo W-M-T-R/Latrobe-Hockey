@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { loadContent } from '../lib/content';
+
+const forms = await loadContent<any>('forms');
+
+const iconPaths: Record<string, string> = {
+  clipboard: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2',
+  calendar: 'M8 2v4M16 2v4M3 10h18M5 6h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z',
+  sun: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41',
+  document: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6',
+};
+---
+<BaseLayout title="Forms" description="Registration packet, tryout schedules, and policy documents for Greater Latrobe Hockey Club.">
+  <PageHero eyebrow={forms.hero.eyebrow} title={forms.hero.title} subtitle={forms.hero.subtitle} />
+
+  <section class="section relative overflow-hidden">
+    <img src="/media/rink.jpg" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover opacity-[0.08] pointer-events-none" />
+    <div class="container-x relative">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="accent-bar"></span>
+        <span class="text-sm font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Get Started</span>
+      </div>
+      <h2 class="section-title">Players & Parents Start Here</h2>
+      <p class="mt-5 max-w-3xl text-lg text-white/85 leading-relaxed">{forms.intro}</p>
+
+      <div class:list={['mt-10 grid gap-6', forms.primary.length >= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : forms.primary.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2']}>
+        {forms.primary.map((doc: any) => (
+          <a href={doc.href} target="_blank" rel="noopener" class="card card-hover group flex flex-col !p-8">
+            <div class="flex items-center justify-between">
+              <span class="h-14 w-14 rounded-2xl bg-wildcat-orange/15 text-wildcat-orange flex items-center justify-center group-hover:bg-wildcat-orange group-hover:text-white transition">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d={iconPaths[doc.icon] ?? iconPaths.document} />
+                </svg>
+              </span>
+              <span class="pill">{doc.kind}</span>
+            </div>
+            <h3 class="mt-6 font-display text-3xl tracking-wide">{doc.title}</h3>
+            <p class="mt-3 text-lg text-white/85 flex-1">{doc.blurb}</p>
+            <span class="mt-6 text-xs uppercase tracking-[0.25em] text-wildcat-orange group-hover:text-wildcat-orange-light">Open →</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-white/[0.02] border-y border-white/10">
+    <div class="container-x grid lg:grid-cols-2 gap-10">
+      <div>
+        <div class="flex items-center gap-3 mb-4"><span class="accent-bar"></span><span class="text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Inside The Packet</span></div>
+        <h2 class="section-title">What's In The Registration Packet</h2>
+        <p class="mt-4 text-lg text-white/85">Everything below is included in the single 2025–2026 packet PDF — no need to chase down separate forms.</p>
+      </div>
+      <ul class="grid sm:grid-cols-2 gap-2">
+        {forms.packetIncludes.map((item: any) => {
+          const label = typeof item === 'string' ? item : item.label;
+          const page = typeof item === 'string' ? '' : (item.page || '').toString().trim();
+          return (
+            <li class="card !p-4 flex items-center gap-3 text-sm">
+              <span class="h-2 w-2 rounded-full bg-wildcat-orange shrink-0"></span>
+              <span class="text-white/85 flex-1">{label}</span>
+              {page && (
+                <span class="text-[10px] uppercase tracking-[0.2em] text-wildcat-orange/80 whitespace-nowrap">Page {page}</span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-x">
+      <div class="flex items-center gap-3 mb-4"><span class="accent-bar"></span><span class="text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Policies</span></div>
+      <h2 class="section-title mb-8">Safety & Policy Documents</h2>
+      <div class="grid sm:grid-cols-3 gap-5">
+        {forms.policies.map((p: any) => (
+          <a href={p.href} target="_blank" rel="noopener" class="card card-hover group">
+            <div class="flex items-center gap-3">
+              <span class="h-10 w-10 rounded-lg bg-wildcat-orange/15 text-wildcat-orange flex items-center justify-center group-hover:bg-wildcat-orange group-hover:text-white transition">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </span>
+              <span class="font-semibold">{p.title}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,23 @@
+{
+  "name": "Greater Latrobe Hockey Club",
+  "shortName": "Latrobe Wildcats Hockey",
+  "tagline": "Pride. Tradition. Latrobe Hockey.",
+  "established": 1981,
+  "domain": "greaterlatrobehockey.com",
+  "logo": "/images/logo.png",
+  "colors": {
+    "primary": "#F26522",
+    "ink": "#0E0E10"
+  },
+  "nav": [
+    { "label": "Home", "href": "/" },
+    { "label": "About", "href": "/about" },
+    { "label": "Schedules", "href": "/schedules" },
+    { "label": "Rosters", "href": "/rosters" },
+    { "label": "Calendar", "href": "/calendar" },
+    { "label": "Forms", "href": "/forms" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "social": [],
+  "footerNote": "Greater Latrobe Senior High School's hockey program. Skating since 1981."
+}

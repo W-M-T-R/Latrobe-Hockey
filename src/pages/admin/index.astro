@@ -1,0 +1,36 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { isAuthed } from '../../lib/auth';
+
+if (isAuthed(Astro.cookies)) {
+  return Astro.redirect('/admin/dashboard');
+}
+
+const error = Astro.url.searchParams.get('error');
+---
+<AdminLayout title="Sign In">
+  <section class="min-h-[70vh] flex items-center justify-center px-4">
+    <div class="w-full max-w-md">
+      <div class="card">
+        <div class="text-center">
+          <div class="text-xs uppercase tracking-[0.3em] text-wildcat-orange">Admin Access</div>
+          <h1 class="font-display text-4xl tracking-wide mt-2">Sign In</h1>
+          <p class="text-white/60 text-sm mt-3">Enter the shared password to edit the site.</p>
+        </div>
+
+        <form method="POST" action="/api/admin/login" class="mt-8 space-y-4">
+          <div>
+            <label class="block text-xs uppercase tracking-[0.25em] text-white/50 mb-2">Password</label>
+            <input type="password" name="password" required autofocus
+                   class="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3 text-base outline-none focus:border-wildcat-orange focus:ring-2 focus:ring-wildcat-orange/30" />
+          </div>
+          {error && <div class="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">Incorrect password.</div>}
+          <button type="submit" class="btn-primary w-full">Sign In</button>
+        </form>
+      </div>
+      <p class="mt-6 text-center text-xs text-white/40">
+        Forgot the password? Ask the President or check the board email thread.
+      </p>
+    </div>
+  </section>
+</AdminLayout>

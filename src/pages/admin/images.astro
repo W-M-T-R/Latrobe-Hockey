@@ -1,0 +1,43 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+<AdminLayout title="Images">
+  <section class="container-x py-10 max-w-2xl">
+    <a href="/admin/dashboard" class="text-xs uppercase tracking-[0.25em] text-white/50 hover:text-wildcat-orange">← Dashboard</a>
+    <h1 class="mt-2 font-display text-4xl uppercase">Image Uploader</h1>
+    <p class="mt-3 text-white/60">Upload a photo, then copy the URL and paste it into a page on the dashboard.</p>
+
+    <form id="up-form" class="card mt-8">
+      <input id="up-input" type="file" accept="image/*" class="w-full text-sm" required />
+      <button id="up-btn" type="submit" class="btn-primary mt-5 w-full">Upload</button>
+      <div id="up-status" class="mt-4 text-sm text-white/70"></div>
+      <div id="up-result" class="mt-4 hidden">
+        <label class="text-xs uppercase tracking-[0.25em] text-white/50">Image URL (copy + paste it):</label>
+        <input id="up-url" readonly class="mt-1 w-full rounded-lg border border-white/15 bg-black/40 px-3 py-2 text-sm" />
+        <img id="up-preview" alt="" class="mt-3 max-h-64 rounded-xl border border-white/10" />
+      </div>
+    </form>
+  </section>
+
+  <script>
+    const f = document.getElementById('up-form') as HTMLFormElement;
+    const input = document.getElementById('up-input') as HTMLInputElement;
+    const status = document.getElementById('up-status') as HTMLDivElement;
+    const result = document.getElementById('up-result') as HTMLDivElement;
+    const url = document.getElementById('up-url') as HTMLInputElement;
+    const preview = document.getElementById('up-preview') as HTMLImageElement;
+    f.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const file = input.files?.[0]; if (!file) return;
+      status.textContent = `Uploading ${file.name}...`;
+      const fd = new FormData(); fd.append('file', file);
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) { status.textContent = j.error || 'Upload failed.'; return; }
+      status.textContent = `✓ Uploaded (${j.via})`;
+      url.value = j.url; preview.src = j.url;
+      result.classList.remove('hidden');
+      url.select();
+    });
+  </script>
+</AdminLayout>

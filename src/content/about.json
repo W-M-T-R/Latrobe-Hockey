@@ -1,0 +1,45 @@
+{
+  "hero": {
+    "eyebrow": "About",
+    "title": "Built On Latrobe Pride",
+    "subtitle": "Established 1981 — competing in the PIHL across Varsity, JV, and Middle School."
+  },
+  "intro": "The Greater Latrobe Hockey Club (GLHC) is a club sport of the Greater Latrobe Senior High School. The club fields teams in the Pennsylvania Interscholastic Hockey League (PIHL) at three levels: Varsity (grades 9–12), Junior Varsity (grades 9–12), and Middle School (grades 6–8).",
+  "teams": [
+    {
+      "name": "Varsity",
+      "grades": "9–12",
+      "blurb": "Holds varsity sport status — letter-earning players are eligible for the school's Letterman's Club."
+    },
+    {
+      "name": "Junior Varsity",
+      "grades": "9–12",
+      "blurb": "Develops players for varsity-level PIHL competition."
+    },
+    {
+      "name": "Middle School",
+      "grades": "6–8",
+      "blurb": "The next wave of Wildcats — building skills, conditioning, and game IQ."
+    }
+  ],
+  "history": {
+    "title": "A Dynasty On Ice",
+    "body": "In 2008, 2009, 2010, and 2013, the Varsity Team were the Pennsylvania AA State Champions and Penguins Cup Champions.",
+    "years": [
+      { "year": "2008", "image": "/images/champ-2008.png" },
+      { "year": "2009", "image": "/images/champ-2009.png" },
+      { "year": "2010", "image": "/images/champ-2010.png" },
+      { "year": "2013", "image": "/images/champ-2013.png" }
+    ]
+  },
+  "governance": {
+    "title": "Governance",
+    "body": "GLHC is run by an elected board of directors who manage operations and finances on behalf of players, parents, and the school community."
+  },
+  "documents": [
+    {
+      "title": "GLHC By-Laws (PDF)",
+      "href": "https://nebula.wsimg.com/edd12dfcf54aa159c8fd5269d4e8cff0?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1"
+    }
+  ]
+}

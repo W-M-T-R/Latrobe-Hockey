@@ -1,0 +1,51 @@
+---
+import { loadContent } from '../lib/content';
+const site = await loadContent<any>('site');
+const { pathname } = Astro.url;
+const isActive = (href: string) =>
+  href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+<header class="sticky top-0 z-40 backdrop-blur-md bg-wildcat-black/70 border-b border-white/10">
+  <nav class="container-x flex h-20 items-center justify-between">
+    <a href="/" class="flex items-center gap-3 group">
+      <img src={site.logo} alt="Latrobe Wildcats logo" class="h-12 w-12 rounded-full ring-2 ring-wildcat-orange/60 group-hover:ring-wildcat-orange transition" />
+      <div class="hidden sm:block">
+        <div class="font-display text-xl tracking-wide leading-none">Latrobe Wildcats</div>
+        <div class="text-[11px] uppercase tracking-[0.3em] text-white/50 mt-1">Hockey Club</div>
+      </div>
+    </a>
+    <button id="nav-toggle" class="md:hidden p-2 rounded-lg border border-white/10" aria-label="Toggle menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <ul id="nav-list" class="hidden md:flex items-center gap-1">
+      {site.nav.map((item: any) => (
+        <li>
+          <a href={item.href}
+             class:list={[
+               'px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wider transition',
+               isActive(item.href)
+                 ? 'bg-wildcat-orange text-white'
+                 : 'text-white/80 hover:text-white hover:bg-white/5'
+             ]}>{item.label}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <ul id="nav-mobile" class="md:hidden hidden border-t border-white/10 px-4 py-3 space-y-1 bg-wildcat-black/95">
+    {site.nav.map((item: any) => (
+      <li>
+        <a href={item.href}
+           class:list={[
+             'block px-4 py-3 rounded-xl font-semibold uppercase tracking-wider text-sm',
+             isActive(item.href) ? 'bg-wildcat-orange text-white' : 'text-white/80 hover:bg-white/5'
+           ]}>{item.label}</a>
+      </li>
+    ))}
+  </ul>
+</header>
+
+<script is:inline>
+  document.getElementById('nav-toggle')?.addEventListener('click', () => {
+    document.getElementById('nav-mobile')?.classList.toggle('hidden');
+  });
+</script>

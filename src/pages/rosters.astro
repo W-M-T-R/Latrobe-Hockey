@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { loadContent } from '../lib/content';
+
+const r = await loadContent<any>('rosters');
+const hasPdf = !!r.pdfHref && r.pdfVisible !== false;
+---
+<BaseLayout title="Rosters">
+  <PageHero eyebrow={r.hero.eyebrow} title={r.hero.title} subtitle={r.hero.subtitle} />
+
+  <section class="section">
+    <div class="container-x">
+      {hasPdf ? (
+        <a href={r.pdfHref} target="_blank" rel="noopener"
+           class="card card-hover group flex flex-col sm:flex-row sm:items-center gap-6 !p-8 max-w-3xl">
+          <span class="h-16 w-16 rounded-2xl bg-wildcat-orange/15 text-wildcat-orange flex items-center justify-center shrink-0 group-hover:bg-wildcat-orange group-hover:text-white transition">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+          </span>
+          <div class="flex-1">
+            <div class="text-xs uppercase tracking-[0.3em] text-wildcat-orange mb-1">PDF</div>
+            <h2 class="font-display text-3xl tracking-wide">{r.pdfTitle || 'Team Rosters'}</h2>
+            {r.pdfBlurb && <p class="mt-2 text-white/85 text-lg">{r.pdfBlurb}</p>}
+          </div>
+          <span class="btn-primary !text-base whitespace-nowrap">Open PDF</span>
+        </a>
+      ) : (
+        <div class="card text-center py-16 max-w-2xl mx-auto">
+          <div class="font-display text-3xl mb-2">Rosters Coming Soon</div>
+          <p class="text-white/80 max-w-lg mx-auto">{r.emptyMessage}</p>
+          <a href="/forms" class="btn-primary mt-6">View Tryout Schedule</a>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,93 @@
+{
+  "hero": {
+    "eyebrow": "Established 1981",
+    "title": "Latrobe Wildcats Hockey Club",
+    "subtitle": "PIHL Varsity, Junior Varsity, and Middle School hockey out of Greater Latrobe Senior High School.",
+    "primaryCta": {
+      "label": "Summer Ice Schedule",
+      "href": "https://nebula.wsimg.com/6d58f717406b464740610a13fdf6d569?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1"
+    },
+    "secondaryCta": {
+      "label": "About the Club",
+      "href": "/about"
+    },
+    "bgImage": "/media/team-2.jpeg",
+    "bgVideo": "/media/team-action.mp4"
+  },
+  "dynasty": {
+    "title": "PA AA State & Penguins Cup Champions",
+    "years": [
+      "2008",
+      "2009",
+      "2010",
+      "2013"
+    ]
+  },
+  "quickLinks": [
+    {
+      "title": "Registration Packet",
+      "blurb": "2025–2026 player registration paperwork.",
+      "href": "https://nebula.wsimg.com/df5a493fb36917ae85992a14373c49cd?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1",
+      "icon": "clipboard",
+      "visible": true
+    },
+    {
+      "title": "Summer Ice Schedule",
+      "blurb": "Dates, times, and what to bring.",
+      "href": "https://nebula.wsimg.com/6d58f717406b464740610a13fdf6d569?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1",
+      "icon": "sun",
+      "visible": true
+    },
+    {
+      "title": "Team Rosters",
+      "blurb": "Varsity, JV, and Middle School lineups.",
+      "href": "",
+      "icon": "clipboard",
+      "visible": false
+    },
+    {
+      "title": "Varsity Schedule",
+      "blurb": "Game dates, times, and opponents.",
+      "href": "",
+      "icon": "calendar",
+      "visible": false
+    },
+    {
+      "title": "Junior Varsity Schedule",
+      "blurb": "Game dates, times, and opponents.",
+      "href": "",
+      "icon": "calendar",
+      "visible": false
+    },
+    {
+      "title": "Middle School Schedule",
+      "blurb": "Game dates, times, and opponents.",
+      "href": "",
+      "icon": "calendar",
+      "visible": false
+    }
+  ],
+  "highlights": [
+    {
+      "stat": "1981",
+      "label": "Established"
+    },
+    {
+      "stat": "3",
+      "label": "Levels of Play"
+    },
+    {
+      "stat": "4",
+      "label": "State Titles"
+    },
+    {
+      "stat": "PIHL",
+      "label": "League"
+    }
+  ],
+  "safesport": {
+    "title": "USA Hockey SafeSport Program",
+    "body": "Player safety is non-negotiable. Read about USA Hockey's SafeSport program for parents, coaches, and athletes.",
+    "href": "http://www.usahockey.com/page/show/908023-usa-hockey-safesport-program"
+  }
+}

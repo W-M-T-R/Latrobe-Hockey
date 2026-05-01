@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { loadContent } from '../lib/content';
+
+const sched = await loadContent<any>('schedules');
+---
+<BaseLayout title="Schedules">
+  <PageHero eyebrow={sched.hero.eyebrow} title={sched.hero.title} subtitle={sched.hero.subtitle} />
+
+  <section class="section">
+    <div class="container-x">
+      <div class="grid md:grid-cols-3 gap-5">
+        {sched.teams.map((team: any) => (
+          (team.pdfHref && team.pdfVisible !== false) ? (
+            <a href={team.pdfHref} target="_blank" rel="noopener"
+               class="card card-hover group flex flex-col !p-7">
+              <div class="flex items-center justify-between">
+                <span class="h-12 w-12 rounded-xl bg-wildcat-orange/15 text-wildcat-orange flex items-center justify-center group-hover:bg-wildcat-orange group-hover:text-white transition">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+                </span>
+                <span class="pill">PDF</span>
+              </div>
+              <h2 class="mt-5 font-display text-3xl tracking-wide">{team.name}</h2>
+              {team.grades && <div class="mt-1 text-xs uppercase tracking-[0.25em] text-white/60">{team.grades}</div>}
+              <p class="mt-3 text-white/85 flex-1">Open the {team.name.toLowerCase()} schedule.</p>
+              <span class="mt-4 text-xs uppercase tracking-[0.25em] text-wildcat-orange group-hover:text-wildcat-orange-light">Open PDF →</span>
+            </a>
+          ) : (
+            <div class="card flex flex-col !p-7 opacity-80">
+              <div class="flex items-center justify-between">
+                <span class="h-12 w-12 rounded-xl bg-white/5 text-white/40 flex items-center justify-center">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                </span>
+                <span class="pill !border-white/20 !text-white/50">TBA</span>
+              </div>
+              <h2 class="mt-5 font-display text-3xl tracking-wide text-white/80">{team.name}</h2>
+              {team.grades && <div class="mt-1 text-xs uppercase tracking-[0.25em] text-white/50">{team.grades}</div>}
+              <p class="mt-3 text-white/80 flex-1">{team.emptyMessage}</p>
+            </div>
+          )
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

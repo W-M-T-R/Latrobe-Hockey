@@ -1,0 +1,30 @@
+{
+  "hero": {
+    "eyebrow": "Schedules",
+    "title": "Game Schedules",
+    "subtitle": "Varsity, Junior Varsity, and Middle School — one PDF per team."
+  },
+  "teams": [
+    {
+      "name": "Varsity",
+      "grades": "Grades 9–12",
+      "pdfHref": "",
+      "pdfVisible": true,
+      "emptyMessage": "Varsity schedule coming soon."
+    },
+    {
+      "name": "Junior Varsity",
+      "grades": "Grades 9–12",
+      "pdfHref": "",
+      "pdfVisible": true,
+      "emptyMessage": "JV schedule coming soon."
+    },
+    {
+      "name": "Middle School",
+      "grades": "Grades 6–8",
+      "pdfHref": "",
+      "pdfVisible": true,
+      "emptyMessage": "Middle School schedule coming soon."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+---
+const { eyebrow, title, subtitle } = Astro.props as {
+  eyebrow?: string; title: string; subtitle?: string;
+};
+---
+<section class="relative overflow-hidden border-b border-white/10">
+  <div class="absolute inset-0 bg-ice-grain [background-size:24px_24px] opacity-60 pointer-events-none"></div>
+  <div class="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-wildcat-orange/20 blur-3xl pointer-events-none"></div>
+  <div class="container-x py-20 sm:py-28 relative">
+    {eyebrow && (
+      <div class="flex items-center gap-3 mb-5">
+        <span class="accent-bar"></span>
+        <span class="text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">{eyebrow}</span>
+      </div>
+    )}
+    <h1 class="font-display text-5xl sm:text-7xl uppercase tracking-tight leading-[0.9] max-w-4xl">{title}</h1>
+    {subtitle && <p class="mt-6 max-w-2xl text-xl text-white/90">{subtitle}</p>}
+  </div>
+</section>

@@ -1,0 +1,388 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadContent, PAGES, type PageKey } from '../../../lib/content';
+
+const { page } = Astro.params;
+if (!page || !(PAGES as readonly string[]).includes(page)) {
+  return Astro.redirect('/admin/dashboard');
+}
+const key = page as PageKey;
+const data = await loadContent<any>(key);
+const json = JSON.stringify(data, null, 2);
+---
+<AdminLayout title={`Edit ${key}`}>
+  <section class="container-x py-10">
+    <div class="flex items-center justify-between gap-4 mb-6 flex-wrap">
+      <div>
+        <a href="/admin/dashboard" class="text-xs uppercase tracking-[0.25em] text-white/50 hover:text-wildcat-orange">← Dashboard</a>
+        <h1 class="mt-2 font-display text-4xl uppercase">Edit: {key}</h1>
+      </div>
+      <div class="flex gap-2">
+        <button id="btn-form" class="btn-ghost !py-2 !px-4 !text-xs" type="button">Form view</button>
+        <button id="btn-json" class="btn-ghost !py-2 !px-4 !text-xs" type="button">Raw JSON</button>
+        <button id="btn-images" class="btn-primary !py-2 !px-4 !text-xs" type="button">📷 Insert image</button>
+      </div>
+    </div>
+
+    <div id="status" class="mb-4 hidden rounded-xl border px-4 py-3 text-sm"></div>
+
+    <form id="editor-form" class="card">
+      <div id="form-view"></div>
+      <div id="json-view" class="hidden">
+        <label class="block text-xs uppercase tracking-[0.25em] text-white/50 mb-2">Raw content (JSON)</label>
+        <textarea id="json-textarea" spellcheck="false"
+                  class="w-full min-h-[60vh] rounded-xl border border-white/15 bg-black/40 p-4 font-mono text-sm leading-relaxed outline-none focus:border-wildcat-orange focus:ring-2 focus:ring-wildcat-orange/30">{json}</textarea>
+      </div>
+
+      <div class="mt-6 flex items-center justify-between flex-wrap gap-3">
+        <div class="text-xs text-white/40">
+          Tip: edit text inline, then click <strong>Save changes</strong>. The site updates automatically.
+        </div>
+        <div class="flex gap-2">
+          <a href={`/admin/edit/${key}`} class="btn-ghost !py-2 !px-4 !text-xs">Reset</a>
+          <button type="submit" class="btn-primary !py-2 !px-5 !text-xs">Save changes</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- Image picker dialog -->
+  <dialog id="image-dialog" class="bg-wildcat-ink text-white rounded-2xl border border-white/15 max-w-md w-[92vw] p-6 backdrop:bg-black/70">
+    <h3 class="font-display text-2xl">Upload an image</h3>
+    <p class="text-sm text-white/60 mt-1">Pick a photo. We'll give you a URL to paste into a field.</p>
+    <input id="img-input" type="file" accept="image/*" class="mt-4 w-full text-sm" />
+    <div id="img-status" class="mt-3 text-sm text-white/70"></div>
+    <div id="img-result" class="mt-3 hidden">
+      <label class="text-xs uppercase tracking-[0.25em] text-white/50">URL (copy + paste into a field):</label>
+      <input id="img-url" readonly class="mt-1 w-full rounded-lg border border-white/15 bg-black/40 px-3 py-2 text-sm" />
+    </div>
+    <div class="mt-5 flex justify-end gap-2">
+      <button id="img-close" class="btn-ghost !py-2 !px-4 !text-xs" type="button">Close</button>
+    </div>
+  </dialog>
+
+  <script id="initial-data" type="application/json" set:html={json}></script>
+
+  <script>
+    type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
+
+    const PAGE_KEY = (document.location.pathname.split('/').pop() || '');
+    const initial: Json = JSON.parse(document.getElementById('initial-data')!.textContent!);
+
+    const $form = document.getElementById('form-view') as HTMLDivElement;
+    const $json = document.getElementById('json-view') as HTMLDivElement;
+    const $jsonTa = document.getElementById('json-textarea') as HTMLTextAreaElement;
+    const $btnForm = document.getElementById('btn-form') as HTMLButtonElement;
+    const $btnJson = document.getElementById('btn-json') as HTMLButtonElement;
+    const $btnImages = document.getElementById('btn-images') as HTMLButtonElement;
+    const $editor = document.getElementById('editor-form') as HTMLFormElement;
+    const $status = document.getElementById('status') as HTMLDivElement;
+
+    // ---- Schema-driven form rendering ----
+    let working: Json = structuredClone(initial);
+
+    const friendlyLabel = (k: string) =>
+      k.replace(/([A-Z])/g, ' $1').replace(/[_-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).trim();
+
+    const isImagePath = (s: string) => /\.(png|jpe?g|gif|webp|svg|avif)$/i.test(s) || s.startsWith('/images/') || s.startsWith('/uploads/') || s.startsWith('/media/');
+    const isPdfPath = (s: string) => /\.pdf(\?|#|$)/i.test(s);
+    const isLongText = (s: string) => s.length > 120 || s.includes('\n');
+    const isFileField = (key: string) => /(href|url|pdf|file|image|logo|photo|src)$/i.test(key);
+
+    function renderField(value: Json, path: string[], label: string): HTMLElement {
+      const wrap = document.createElement('div');
+      wrap.className = 'mb-4';
+      const lab = document.createElement('label');
+      lab.className = 'block text-xs uppercase tracking-[0.25em] text-white/50 mb-2';
+      lab.textContent = label;
+      wrap.appendChild(lab);
+
+      if (typeof value === 'string') {
+        const useTextarea = isLongText(value);
+        const lastKey = path[path.length - 1] ?? '';
+        const fileLike = isFileField(String(lastKey));
+
+        const inputRow = document.createElement('div');
+        inputRow.className = fileLike && !useTextarea ? 'flex gap-2' : '';
+
+        const input = document.createElement(useTextarea ? 'textarea' : 'input') as any;
+        input.value = value;
+        input.className = 'w-full rounded-xl border border-white/15 bg-black/40 px-4 py-2.5 text-sm outline-none focus:border-wildcat-orange focus:ring-2 focus:ring-wildcat-orange/30';
+        if (useTextarea) input.rows = Math.min(10, Math.max(3, value.split('\n').length + 1));
+        else input.type = 'text';
+        input.dataset.path = JSON.stringify(path);
+        input.addEventListener('input', () => setAt(path, input.value));
+        inputRow.appendChild(input);
+
+        if (fileLike && !useTextarea) {
+          const upBtn = document.createElement('button');
+          upBtn.type = 'button';
+          upBtn.className = 'shrink-0 rounded-xl border border-wildcat-orange/40 bg-wildcat-orange/15 hover:bg-wildcat-orange hover:text-white text-wildcat-orange px-4 py-2.5 text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition';
+          upBtn.textContent = '📎 Upload';
+          const hidden = document.createElement('input');
+          hidden.type = 'file';
+          hidden.accept = 'image/*,application/pdf,.pdf';
+          hidden.style.display = 'none';
+          hidden.addEventListener('change', async () => {
+            const f = hidden.files?.[0]; if (!f) return;
+            const orig = upBtn.textContent;
+            upBtn.disabled = true;
+            upBtn.textContent = 'Uploading…';
+            try {
+              const fd = new FormData(); fd.append('file', f);
+              const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+              const j = await res.json().catch(() => ({}));
+              if (!res.ok) throw new Error(j.error || 'upload failed');
+              input.value = j.url;
+              setAt(path, j.url);
+              input.dispatchEvent(new Event('input'));
+              renderForm();
+            } catch (e: any) {
+              showStatus('error', e.message || 'Upload failed.');
+            } finally {
+              upBtn.disabled = false;
+              upBtn.textContent = orig;
+            }
+          });
+          upBtn.addEventListener('click', () => hidden.click());
+          inputRow.appendChild(upBtn);
+          wrap.appendChild(hidden);
+        }
+
+        wrap.appendChild(inputRow);
+
+        if (isImagePath(value)) {
+          const preview = document.createElement('img');
+          preview.src = value;
+          preview.alt = '';
+          preview.className = 'mt-2 max-h-28 rounded-lg border border-white/10';
+          preview.onerror = () => preview.remove();
+          wrap.appendChild(preview);
+        } else if (isPdfPath(value) || (fileLike && value.includes('nebula.wsimg.com'))) {
+          const pdfTag = document.createElement('a');
+          pdfTag.href = value;
+          pdfTag.target = '_blank';
+          pdfTag.rel = 'noopener';
+          pdfTag.className = 'mt-2 inline-flex items-center gap-2 text-xs text-wildcat-orange hover:underline';
+          pdfTag.textContent = '📄 Open current file ↗';
+          wrap.appendChild(pdfTag);
+        }
+      } else if (typeof value === 'number') {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.value = String(value);
+        input.className = 'w-full rounded-xl border border-white/15 bg-black/40 px-4 py-2.5 text-sm outline-none focus:border-wildcat-orange focus:ring-2 focus:ring-wildcat-orange/30';
+        input.addEventListener('input', () => setAt(path, Number(input.value)));
+        wrap.appendChild(input);
+      } else if (typeof value === 'boolean') {
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.checked = value;
+        input.className = 'h-5 w-5 accent-wildcat-orange';
+        input.addEventListener('change', () => setAt(path, input.checked));
+        wrap.appendChild(input);
+      } else if (Array.isArray(value)) {
+        wrap.appendChild(renderArray(value, path));
+      } else if (value && typeof value === 'object') {
+        wrap.appendChild(renderObject(value as { [k: string]: Json }, path));
+      } else {
+        const input = document.createElement('input');
+        input.value = String(value ?? '');
+        input.className = 'w-full rounded-xl border border-white/15 bg-black/40 px-4 py-2.5 text-sm';
+        wrap.appendChild(input);
+      }
+
+      return wrap;
+    }
+
+    function renderObject(obj: { [k: string]: Json }, path: string[]): HTMLElement {
+      const box = document.createElement('div');
+      box.className = path.length > 0 ? 'mt-2 rounded-xl border border-white/10 bg-white/[0.02] p-4' : '';
+      Object.keys(obj).forEach((k) => {
+        const child = renderField(obj[k]!, [...path, k], friendlyLabel(k));
+        box.appendChild(child);
+      });
+      return box;
+    }
+
+    function renderArray(arr: Json[], path: string[]): HTMLElement {
+      const box = document.createElement('div');
+      box.className = 'mt-2 space-y-3';
+
+      const list = document.createElement('div');
+      list.className = 'space-y-3';
+
+      const rerender = () => {
+        list.innerHTML = '';
+        const current = getAt(path) as Json[];
+        current.forEach((item, idx) => {
+          const itemBox = document.createElement('div');
+          itemBox.className = 'rounded-xl border border-white/10 bg-white/[0.03] p-4';
+          const head = document.createElement('div');
+          head.className = 'flex items-center justify-between mb-3';
+          const t = document.createElement('div');
+          t.className = 'text-xs uppercase tracking-[0.25em] text-wildcat-orange';
+          t.textContent = `Item ${idx + 1}`;
+          const actions = document.createElement('div');
+          actions.className = 'flex gap-1';
+          const rm = document.createElement('button');
+          rm.type = 'button';
+          rm.className = 'btn-ghost !py-1 !px-3 !text-[10px]';
+          rm.textContent = 'Remove';
+          rm.addEventListener('click', () => {
+            const cur = getAt(path) as Json[];
+            cur.splice(idx, 1);
+            setAt(path, cur);
+            rerender();
+          });
+          actions.appendChild(rm);
+          head.appendChild(t);
+          head.appendChild(actions);
+          itemBox.appendChild(head);
+          itemBox.appendChild(renderField(item, [...path, String(idx)], 'Value'));
+          list.appendChild(itemBox);
+        });
+      };
+      rerender();
+
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.className = 'btn-ghost !py-2 !px-4 !text-xs mt-2';
+      addBtn.textContent = '+ Add item';
+      addBtn.addEventListener('click', () => {
+        const cur = getAt(path) as Json[];
+        const template = cur.length ? cloneEmpty(cur[0]!) : '';
+        cur.push(template);
+        setAt(path, cur);
+        rerender();
+      });
+
+      box.appendChild(list);
+      box.appendChild(addBtn);
+      return box;
+    }
+
+    function cloneEmpty(sample: Json): Json {
+      if (typeof sample === 'string') return '';
+      if (typeof sample === 'number') return 0;
+      if (typeof sample === 'boolean') return false;
+      if (Array.isArray(sample)) return [];
+      if (sample && typeof sample === 'object') {
+        const out: { [k: string]: Json } = {};
+        Object.keys(sample).forEach((k) => { out[k] = cloneEmpty((sample as any)[k]); });
+        return out;
+      }
+      return '';
+    }
+
+    function getAt(path: string[]): Json {
+      let cur: any = working;
+      for (const p of path) cur = cur[p];
+      return cur;
+    }
+    function setAt(path: string[], value: Json) {
+      if (path.length === 0) { working = value; return; }
+      let cur: any = working;
+      for (let i = 0; i < path.length - 1; i++) cur = cur[path[i]!];
+      cur[path[path.length - 1]!] = value;
+    }
+
+    function renderForm() {
+      $form.innerHTML = '';
+      if (Array.isArray(working) || typeof working !== 'object' || working === null) {
+        $form.appendChild(renderField(working, [], 'Content'));
+      } else {
+        $form.appendChild(renderObject(working as any, []));
+      }
+    }
+    renderForm();
+
+    // ---- View toggling ----
+    function showForm() {
+      // Sync from JSON if user was editing JSON
+      if (!$json.classList.contains('hidden')) {
+        try {
+          working = JSON.parse($jsonTa.value);
+          renderForm();
+        } catch (e) {
+          showStatus('error', 'JSON is invalid — fix it before switching views.');
+          return;
+        }
+      }
+      $form.classList.remove('hidden');
+      $json.classList.add('hidden');
+    }
+    function showJson() {
+      $jsonTa.value = JSON.stringify(working, null, 2);
+      $form.classList.add('hidden');
+      $json.classList.remove('hidden');
+    }
+    $btnForm.addEventListener('click', showForm);
+    $btnJson.addEventListener('click', showJson);
+
+    function showStatus(kind: 'ok' | 'error' | 'info', msg: string) {
+      $status.classList.remove('hidden', 'border-green-500/40', 'bg-green-500/10', 'text-green-200',
+        'border-red-500/40', 'bg-red-500/10', 'text-red-200',
+        'border-white/15', 'bg-white/5', 'text-white/80');
+      const cls = kind === 'ok' ? ['border-green-500/40','bg-green-500/10','text-green-200']
+        : kind === 'error' ? ['border-red-500/40','bg-red-500/10','text-red-200']
+        : ['border-white/15','bg-white/5','text-white/80'];
+      $status.classList.add(...cls);
+      $status.textContent = msg;
+    }
+
+    // ---- Save ----
+    $editor.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let payload: Json;
+      if ($json.classList.contains('hidden')) {
+        payload = working;
+      } else {
+        try { payload = JSON.parse($jsonTa.value); }
+        catch (err: any) { showStatus('error', 'Invalid JSON: ' + err.message); return; }
+      }
+      showStatus('info', 'Saving...');
+      const res = await fetch(`/api/admin/save/${PAGE_KEY}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok) { showStatus('error', result.error || 'Save failed.'); return; }
+      showStatus('ok', `Saved! (${result.via === 'github' ? 'live deploy in progress' : 'local files'})`);
+      working = payload;
+      renderForm();
+    });
+
+    // ---- Image dialog ----
+    const $dlg = document.getElementById('image-dialog') as HTMLDialogElement;
+    const $imgInput = document.getElementById('img-input') as HTMLInputElement;
+    const $imgStatus = document.getElementById('img-status') as HTMLDivElement;
+    const $imgResult = document.getElementById('img-result') as HTMLDivElement;
+    const $imgUrl = document.getElementById('img-url') as HTMLInputElement;
+    const $imgClose = document.getElementById('img-close') as HTMLButtonElement;
+
+    $btnImages.addEventListener('click', () => {
+      $imgStatus.textContent = '';
+      $imgResult.classList.add('hidden');
+      $imgInput.value = '';
+      $dlg.showModal();
+    });
+    $imgClose.addEventListener('click', () => $dlg.close());
+
+    $imgInput.addEventListener('change', async () => {
+      const f = $imgInput.files?.[0];
+      if (!f) return;
+      $imgStatus.textContent = `Uploading ${f.name}...`;
+      const fd = new FormData();
+      fd.append('file', f);
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) { $imgStatus.textContent = j.error || 'Upload failed.'; return; }
+      $imgStatus.textContent = `✓ Uploaded (${j.via})`;
+      $imgUrl.value = j.url;
+      $imgResult.classList.remove('hidden');
+      $imgUrl.select();
+    });
+  </script>
+</AdminLayout>

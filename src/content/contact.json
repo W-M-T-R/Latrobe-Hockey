@@ -1,0 +1,41 @@
+{
+  "hero": {
+    "eyebrow": "Contact",
+    "title": "Reach The Board",
+    "subtitle": "Questions about registration, schedules, or the program? Get in touch with the right person."
+  },
+  "board": [
+    {
+      "name": "Leslie Rossi",
+      "role": "President",
+      "email": "Rossiteam5@aol.com",
+      "phone": "412-638-3507"
+    },
+    {
+      "name": "Heather Ruffner",
+      "role": "Vice-President & Registrar",
+      "email": "steelers121@wpa.net",
+      "phone": ""
+    },
+    {
+      "name": "Mike Gmuer",
+      "role": "Treasurer",
+      "email": "mgmuer_157@comcast.net",
+      "phone": ""
+    },
+    {
+      "name": "Timea Szep",
+      "role": "Secretary",
+      "email": "petimcsi@yahoo.com",
+      "phone": ""
+    }
+  ],
+  "mailing": {
+    "title": "Mailing Address",
+    "lines": [
+      "Greater Latrobe Hockey Club",
+      "P.O. Box 8",
+      "Latrobe, PA 15650"
+    ]
+  }
+}

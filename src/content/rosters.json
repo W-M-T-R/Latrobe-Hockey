@@ -1,0 +1,12 @@
+{
+  "hero": {
+    "eyebrow": "Rosters",
+    "title": "Team Rosters",
+    "subtitle": "Player rosters for all three Wildcats teams."
+  },
+  "pdfHref": "",
+  "pdfVisible": true,
+  "pdfTitle": "Wildcats Rosters",
+  "pdfBlurb": "Varsity, Junior Varsity, and Middle School — all on one PDF.",
+  "emptyMessage": "Rosters will be posted here once tryouts wrap up."
+}

@@ -1,0 +1,32 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { loadContent } from '../lib/content';
+
+const site = await loadContent<any>('site');
+const { title, description } = Astro.props as { title?: string; description?: string };
+const fullTitle = title ? `${title} · ${site.shortName}` : site.name;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/png" href={site.logo} />
+    <title>{fullTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={site.logo} />
+    {description && <meta property="og:description" content={description} />}
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <Nav />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

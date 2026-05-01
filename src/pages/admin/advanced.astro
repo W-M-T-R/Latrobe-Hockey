@@ -1,0 +1,57 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { persistMode } from '../../lib/persist';
+
+const pages = [
+  { key: 'site', label: 'Site (logo, name, navigation, footer)', viewHref: '/' },
+  { key: 'home', label: 'Home', viewHref: '/' },
+  { key: 'about', label: 'About', viewHref: '/about' },
+  { key: 'contact', label: 'Contact', viewHref: '/contact' },
+  { key: 'calendar', label: 'Calendar', viewHref: '/calendar' },
+  { key: 'forms', label: 'Forms & Documents', viewHref: '/forms' },
+  { key: 'schedules', label: 'Schedules', viewHref: '/schedules' },
+  { key: 'rosters', label: 'Rosters', viewHref: '/rosters' },
+];
+
+const mode = persistMode();
+---
+<AdminLayout title="Advanced">
+  <section class="container-x py-12">
+    <a href="/admin/dashboard" class="text-xs uppercase tracking-[0.25em] text-white/50 hover:text-wildcat-orange">← Back to Dashboard</a>
+    <div class="mt-3 flex items-center gap-3 mb-3">
+      <span class="accent-bar"></span>
+      <span class="text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Advanced</span>
+    </div>
+    <h1 class="font-display text-4xl sm:text-5xl uppercase">Edit Page Content</h1>
+    <p class="mt-3 text-white/80 max-w-2xl">
+      Edit any page's text, headlines, button labels, board members, or any other content. Most things you'll want to change are simpler from the main Dashboard — only come here if you need full control.
+    </p>
+
+    <div class="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs">
+      <span class="h-2 w-2 rounded-full" style={`background: ${mode === 'github' ? '#22c55e' : '#f59e0b'}`}></span>
+      <span class="text-white/80">
+        Saving to <strong>{mode === 'github' ? 'GitHub (live deploy)' : 'local files (dev mode)'}</strong>
+      </span>
+    </div>
+
+    <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {pages.map((p) => (
+        <div class="card card-hover">
+          <div class="text-xs uppercase tracking-[0.3em] text-wildcat-orange mb-2">{p.key}</div>
+          <h2 class="font-display text-2xl tracking-wide">{p.label}</h2>
+          <div class="mt-5 flex gap-2">
+            <a href={`/admin/edit/${p.key}`} class="btn-primary !py-2 !px-4 !text-xs">Edit</a>
+            <a href={p.viewHref} target="_blank" class="btn-ghost !py-2 !px-4 !text-xs">View →</a>
+          </div>
+        </div>
+      ))}
+
+      <a href="/admin/images" class="card card-hover border-dashed flex flex-col items-start">
+        <div class="text-xs uppercase tracking-[0.3em] text-wildcat-orange mb-2">Tools</div>
+        <h2 class="font-display text-2xl tracking-wide">Upload an Image</h2>
+        <p class="mt-3 text-sm text-white/80">Upload a photo and copy its URL to paste into any page.</p>
+        <span class="mt-5 btn-primary !py-2 !px-4 !text-xs">Open Uploader</span>
+      </a>
+    </div>
+  </section>
+</AdminLayout>

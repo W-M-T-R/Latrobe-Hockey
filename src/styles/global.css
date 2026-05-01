@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-wildcat-black text-white font-sans antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 90% -10%, rgba(242,101,34,0.18), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(125,211,252,0.10), transparent 60%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display tracking-wide;
+  }
+}
+
+@layer components {
+  .container-x { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-semibold uppercase tracking-wider text-sm transition;
+  }
+  .btn-primary {
+    @apply btn bg-wildcat-orange text-white hover:bg-wildcat-orange-dark shadow-glow;
+  }
+  .btn-ghost {
+    @apply btn border border-white/15 bg-white/5 hover:bg-white/10 text-white;
+  }
+  .card {
+    @apply rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-6;
+  }
+  .card-hover {
+    @apply transition hover:-translate-y-1 hover:border-wildcat-orange/60 hover:bg-white/[0.06];
+  }
+  .pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-widest;
+  }
+  .section { @apply py-16 sm:py-24; }
+  .section-title { @apply font-display text-4xl sm:text-5xl uppercase tracking-wide; }
+  .accent-bar { @apply inline-block h-1 w-12 bg-wildcat-orange rounded-full; }
+}

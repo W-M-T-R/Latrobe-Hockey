@@ -1,0 +1,138 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadContent } from '../lib/content';
+
+const home = await loadContent<any>('home');
+const visibleLinks = (home.quickLinks ?? []).filter((l: any) => l.visible !== false && (l.href ?? '').trim() !== '');
+
+const iconPaths: Record<string, string> = {
+  clipboard: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2',
+  calendar: 'M8 2v4M16 2v4M3 10h18M5 6h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z',
+  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  ticket: 'M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2zM13 5v14',
+  sun: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41',
+};
+---
+<BaseLayout title="Home" description="Greater Latrobe Hockey Club — Wildcats hockey since 1981. Varsity, JV, and Middle School in the PIHL.">
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0">
+      <video autoplay muted loop playsinline class="h-full w-full object-cover opacity-80" poster={home.hero.bgImage}>
+        <source src={home.hero.bgVideo} type="video/mp4" />
+      </video>
+      <!-- darker bottom + side fades for text legibility, but the video stays bright -->
+      <div class="absolute inset-0 bg-gradient-to-r from-wildcat-black/85 via-wildcat-black/40 to-transparent"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-wildcat-black/40 via-transparent to-wildcat-black"></div>
+    </div>
+    <div class="container-x relative pt-24 pb-32 sm:pt-32 sm:pb-40">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="accent-bar"></span>
+        <span class="text-sm font-semibold uppercase tracking-[0.3em] text-wildcat-orange">{home.hero.eyebrow}</span>
+      </div>
+      <h1 class="font-display text-6xl sm:text-8xl uppercase leading-[0.85] tracking-tight max-w-5xl text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.7)]">
+        {home.hero.title}
+      </h1>
+      <p class="mt-8 max-w-2xl text-xl sm:text-2xl text-white font-medium drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">{home.hero.subtitle}</p>
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href={home.hero.primaryCta.href}
+           target={home.hero.primaryCta.href.startsWith('http') ? '_blank' : undefined}
+           rel={home.hero.primaryCta.href.startsWith('http') ? 'noopener' : undefined}
+           class="btn-primary !text-base">
+          {home.hero.primaryCta.label}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href={home.hero.secondaryCta.href}
+           target={home.hero.secondaryCta.href.startsWith('http') ? '_blank' : undefined}
+           rel={home.hero.secondaryCta.href.startsWith('http') ? 'noopener' : undefined}
+           class="btn-ghost !text-base !bg-white/10 hover:!bg-white/20 !border-white/40">{home.hero.secondaryCta.label}</a>
+      </div>
+    </div>
+    <!-- bottom highlight strip -->
+    <div class="relative border-y border-white/10 bg-black/60 backdrop-blur-sm">
+      <div class="container-x grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/10">
+        {home.highlights.map((h: any) => (
+          <div class="py-7 text-center first:pl-0 px-4">
+            <div class="font-display text-4xl sm:text-5xl text-wildcat-orange">{h.stat}</div>
+            <div class="mt-1.5 text-xs uppercase tracking-[0.25em] text-white/80">{h.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK LINKS -->
+  <section class="section bg-white/[0.02] border-y border-white/10 relative overflow-hidden">
+    <!-- subtle rink photo as background flavor -->
+    <img src="/media/rink.jpg" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full object-cover opacity-[0.08] pointer-events-none" />
+    <div class="container-x relative">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="accent-bar"></span>
+            <span class="text-sm font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Get Started</span>
+          </div>
+          <h2 class="section-title">Players & Parents Start Here</h2>
+        </div>
+        <a href="/forms" class="btn-ghost self-start !text-base">All Forms →</a>
+      </div>
+      <div class:list={['grid gap-5', visibleLinks.length >= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : visibleLinks.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2']}>
+        {visibleLinks.map((link: any) => (
+          <a href={link.href} target="_blank" rel="noopener" class="card card-hover group flex flex-col">
+            <div class="h-12 w-12 rounded-xl bg-wildcat-orange/15 text-wildcat-orange flex items-center justify-center mb-4 group-hover:bg-wildcat-orange group-hover:text-white transition">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d={iconPaths[link.icon] ?? iconPaths.clipboard} />
+              </svg>
+            </div>
+            <h3 class="font-display text-2xl tracking-wide">{link.title}</h3>
+            <p class="mt-2 text-base text-white/80 flex-1">{link.blurb}</p>
+            <span class="mt-4 text-xs uppercase tracking-[0.25em] text-wildcat-orange group-hover:text-wildcat-orange-light">Open →</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- DYNASTY BANNER -->
+  <section class="section relative overflow-hidden">
+    <img src="/images/wildcats-mark.png" alt="" aria-hidden="true"
+         class="pointer-events-none absolute -right-24 top-1/2 -translate-y-1/2 h-[110%] opacity-[0.06] invert mix-blend-screen select-none" />
+    <div class="container-x relative">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-16">
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="accent-bar"></span>
+            <span class="text-sm font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Dynasty</span>
+          </div>
+          <h2 class="section-title">{home.dynasty.title}</h2>
+          <p class="mt-4 text-white/85 text-lg max-w-xl">Four state titles. Four Penguins Cup victories. The Wildcats have built one of Western PA's most decorated club hockey programs.</p>
+        </div>
+        <div class="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {home.dynasty.years.map((year: string) => (
+            <div class="card card-hover text-center">
+              <div class="font-display text-5xl text-wildcat-orange leading-none">{year}</div>
+              <div class="mt-3 text-[10px] uppercase tracking-[0.3em] text-white/70">PA AA Champions</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAFESPORT -->
+  <section class="section">
+    <div class="container-x">
+      <div class="card relative overflow-hidden">
+        <div class="absolute -right-20 -bottom-20 h-72 w-72 rounded-full bg-wildcat-orange/10 blur-3xl pointer-events-none"></div>
+        <div class="relative grid lg:grid-cols-[auto,1fr,auto] items-center gap-8">
+          <img src="/images/usa-hockey.png" alt="USA Hockey"
+               class="h-14 sm:h-20 w-auto object-contain shrink-0" />
+          <div>
+            <h3 class="font-display text-3xl tracking-wide">{home.safesport.title}</h3>
+            <p class="mt-3 text-lg text-white/85 max-w-2xl">{home.safesport.body}</p>
+          </div>
+          <a href={home.safesport.href} target="_blank" rel="noopener" class="btn-primary whitespace-nowrap !text-base">Learn More</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

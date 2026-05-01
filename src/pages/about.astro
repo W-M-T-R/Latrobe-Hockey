@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { loadContent } from '../lib/content';
+
+const about = await loadContent<any>('about');
+---
+<BaseLayout title="About" description="About the Greater Latrobe Hockey Club — established 1981, four-time PA AA state champions.">
+  <PageHero eyebrow={about.hero.eyebrow} title={about.hero.title} subtitle={about.hero.subtitle} />
+
+  <section class="section">
+    <div class="container-x grid lg:grid-cols-3 gap-10">
+      <div class="lg:col-span-2 space-y-6 text-lg text-white/80 leading-relaxed">
+        <p>{about.intro}</p>
+      </div>
+      <aside class="card">
+        <div class="text-xs uppercase tracking-[0.3em] text-wildcat-orange mb-3">By The Numbers</div>
+        <dl class="grid grid-cols-2 gap-y-4">
+          <dt class="text-white/50 text-sm">Founded</dt><dd class="font-display text-2xl">1981</dd>
+          <dt class="text-white/50 text-sm">League</dt><dd class="font-display text-2xl">PIHL</dd>
+          <dt class="text-white/50 text-sm">Teams</dt><dd class="font-display text-2xl">3</dd>
+          <dt class="text-white/50 text-sm">State Titles</dt><dd class="font-display text-2xl text-wildcat-orange">4</dd>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section bg-white/[0.02] border-y border-white/10">
+    <div class="container-x">
+      <div class="flex items-center gap-3 mb-4"><span class="accent-bar"></span><span class="text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Programs</span></div>
+      <h2 class="section-title mb-10">Three Levels Of Wildcats Hockey</h2>
+      <div class="grid md:grid-cols-3 gap-5">
+        {about.teams.map((team: any) => (
+          <div class="card card-hover">
+            <div class="font-display text-3xl text-wildcat-orange">{team.name}</div>
+            <div class="mt-1 text-xs uppercase tracking-[0.25em] text-white/50">Grades {team.grades}</div>
+            <p class="mt-4 text-white/85 text-lg leading-relaxed">{team.blurb}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container-x">
+      <div class="flex items-center gap-3 mb-4"><span class="accent-bar"></span><span class="text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">History</span></div>
+      <h2 class="section-title">{about.history.title}</h2>
+      <p class="mt-4 max-w-2xl text-white/85 text-lg">{about.history.body}</p>
+      <div class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-5">
+        {about.history.years.map((y: any) => (
+          <div class="card text-center group hover:border-wildcat-orange/50 transition">
+            {y.image && <img src={y.image} alt={`${y.year} championship`} class="mx-auto h-28 w-28 object-contain mb-4" loading="lazy" />}
+            <div class="font-display text-4xl text-wildcat-orange">{y.year}</div>
+            <div class="mt-2 text-[10px] uppercase tracking-[0.3em] text-white/50">PA AA Champions</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-white/[0.02] border-t border-white/10">
+    <div class="container-x grid md:grid-cols-2 gap-10">
+      <div>
+        <div class="flex items-center gap-3 mb-4"><span class="accent-bar"></span><span class="text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Governance</span></div>
+        <h2 class="section-title">{about.governance.title}</h2>
+        <p class="mt-4 text-white/85 text-lg leading-relaxed">{about.governance.body}</p>
+      </div>
+      <div class="card">
+        <h3 class="text-xs uppercase tracking-[0.3em] text-wildcat-orange mb-4">Club Documents</h3>
+        <ul class="space-y-3">
+          {about.documents.map((doc: any) => (
+            <li>
+              <a href={doc.href} target="_blank" rel="noopener" class="flex items-center gap-3 group">
+                <span class="h-9 w-9 rounded-lg bg-wildcat-orange/15 text-wildcat-orange flex items-center justify-center group-hover:bg-wildcat-orange group-hover:text-white transition">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                </span>
+                <span class="text-white/80 group-hover:text-white">{doc.title}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
