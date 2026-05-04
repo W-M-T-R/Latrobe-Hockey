@@ -20,8 +20,9 @@ const docState = DOCUMENTS.map((d: Document) => {
   const firstRef = d.refs[0]!;
   const current = (getByDot(pageData[firstRef.page], firstRef.dot) ?? '').toString();
   let pdfVisible: boolean | null = null;
-  if (d.visibilityRef) {
-    const v = getByDot(pageData[d.visibilityRef.page], d.visibilityRef.dot);
+  if (d.visibilityRefs && d.visibilityRefs.length > 0) {
+    const r = d.visibilityRefs[0]!;
+    const v = getByDot(pageData[r.page], r.dot);
     pdfVisible = v !== false; // default to true if undefined
   }
   return { ...d, current, pdfVisible };
@@ -81,7 +82,7 @@ const mode = persistMode();
               </div>
             </div>
             <div class="flex flex-wrap gap-2 shrink-0 items-center">
-              {d.visibilityRef && (
+              {d.visibilityRefs && d.visibilityRefs.length > 0 && (
                 <button type="button"
                         class:list={[
                           'visibility-chip rounded-full px-3 py-1.5 text-xs font-semibold border transition whitespace-nowrap cursor-pointer',
@@ -119,7 +120,7 @@ const mode = persistMode();
               </div>
             </div>
             <div class="flex flex-wrap gap-2 shrink-0 items-center">
-              {d.visibilityRef && (
+              {d.visibilityRefs && d.visibilityRefs.length > 0 && (
                 <button type="button"
                         class:list={[
                           'visibility-chip rounded-full px-3 py-1.5 text-xs font-semibold border transition whitespace-nowrap cursor-pointer',
@@ -240,14 +241,14 @@ const mode = persistMode();
           <div class="text-xs uppercase tracking-[0.25em] text-amber-300 mb-2">Step 3 · Optional</div>
           <label class="block text-sm font-semibold mb-2">New Golf Outing flyer</label>
           <input type="file" id="summer-golf-file" accept="application/pdf,.pdf,image/*" class="w-full text-sm" />
-          <div id="summer-golf-status" class="mt-1 text-xs text-white/60">Skip if you're not running the outing this year, or if details aren't ready.</div>
+          <div id="summer-golf-status" class="mt-1 text-xs text-white/60">Got it? Drop the new flyer here. <strong>If you don't have it yet</strong> — leave blank and we'll hide last year's until you upload one.</div>
         </div>
 
         <div>
           <div class="text-xs uppercase tracking-[0.25em] text-amber-300 mb-2">Step 4 · Optional</div>
           <label class="block text-sm font-semibold mb-2">New Ad Book Fundraiser packet</label>
           <input type="file" id="summer-adbook-file" accept="application/pdf,.pdf,image/*" class="w-full text-sm" />
-          <div id="summer-adbook-status" class="mt-1 text-xs text-white/60">Skip if not ready yet.</div>
+          <div id="summer-adbook-status" class="mt-1 text-xs text-white/60">Got it? Drop the new packet here. <strong>If you don't have it yet</strong> — leave blank and we'll hide last year's until you upload one.</div>
         </div>
 
         <div class="rounded-2xl border border-amber-400/40 bg-amber-400/5 p-5">
@@ -493,6 +494,16 @@ const mode = persistMode();
       return j.url;
     }
 
+    async function setVisibility(documentId: string, visible: boolean): Promise<void> {
+      const res = await fetch('/api/admin/document-visibility', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ documentId, visible }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j.error || `visibility update failed for ${documentId}`);
+    }
+
     $summerGo?.addEventListener('click', async () => {
       $summerGo.disabled = true;
       const orig = $summerGo.textContent;
@@ -510,12 +521,18 @@ const mode = persistMode();
         if ($summerGolf.files?.[0]) {
           $summerGolfStatus.textContent = `Uploading ${$summerGolf.files[0].name}…`;
           await uploadDoc('golf-outing', $summerGolf.files[0]);
-          $summerGolfStatus.textContent = `✓ Uploaded.`;
+          $summerGolfStatus.textContent = `✓ Uploaded — visible on the site.`;
+        } else {
+          await setVisibility('golf-outing', false);
+          $summerGolfStatus.textContent = `Hidden until you upload one.`;
         }
         if ($summerAdbook.files?.[0]) {
           $summerAdbookStatus.textContent = `Uploading ${$summerAdbook.files[0].name}…`;
           await uploadDoc('ad-book', $summerAdbook.files[0]);
-          $summerAdbookStatus.textContent = `✓ Uploaded.`;
+          $summerAdbookStatus.textContent = `✓ Uploaded — visible on the site.`;
+        } else {
+          await setVisibility('ad-book', false);
+          $summerAdbookStatus.textContent = `Hidden until you upload one.`;
         }
         $summerGo.textContent = 'Switching…';
         const res = await fetch('/api/admin/transition', {

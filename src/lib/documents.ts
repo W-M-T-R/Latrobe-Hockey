@@ -7,10 +7,10 @@ export type Document = {
   description?: string;
   group: 'season' | 'standing';
   refs: DocRef[];
-  // If set, the doc supports a visible/hidden toggle on its dedicated page.
-  // The dot path points at a boolean flag inside the page's JSON.
-  visibilityRef?: DocRef;
-  // Friendly name of the page this hides on, for UI labels.
+  // If set, the doc has a Show/Hide toggle. Multiple refs let one click hide
+  // a doc across every place it appears (e.g. dedicated page card AND homepage card AND forms list).
+  visibilityRefs?: DocRef[];
+  // Friendly name of where this hides, for UI labels (e.g. "Rosters", "Forms", "site").
   visibilityPage?: string;
 };
 
@@ -52,7 +52,7 @@ export const DOCUMENTS: Document[] = [
       { page: 'rosters', dot: 'pdfHref' },
       { page: 'home',    dot: 'quickLinks.2.href' },
     ],
-    visibilityRef: { page: 'rosters', dot: 'pdfVisible' },
+    visibilityRefs: [{ page: 'rosters', dot: 'pdfVisible' }],
     visibilityPage: 'Rosters',
   },
   {
@@ -64,7 +64,7 @@ export const DOCUMENTS: Document[] = [
       { page: 'schedules', dot: 'teams.0.pdfHref' },
       { page: 'home',      dot: 'quickLinks.3.href' },
     ],
-    visibilityRef: { page: 'schedules', dot: 'teams.0.pdfVisible' },
+    visibilityRefs: [{ page: 'schedules', dot: 'teams.0.pdfVisible' }],
     visibilityPage: 'Schedules',
   },
   {
@@ -76,7 +76,7 @@ export const DOCUMENTS: Document[] = [
       { page: 'schedules', dot: 'teams.1.pdfHref' },
       { page: 'home',      dot: 'quickLinks.4.href' },
     ],
-    visibilityRef: { page: 'schedules', dot: 'teams.1.pdfVisible' },
+    visibilityRefs: [{ page: 'schedules', dot: 'teams.1.pdfVisible' }],
     visibilityPage: 'Schedules',
   },
   {
@@ -88,7 +88,7 @@ export const DOCUMENTS: Document[] = [
       { page: 'schedules', dot: 'teams.2.pdfHref' },
       { page: 'home',      dot: 'quickLinks.5.href' },
     ],
-    visibilityRef: { page: 'schedules', dot: 'teams.2.pdfVisible' },
+    visibilityRefs: [{ page: 'schedules', dot: 'teams.2.pdfVisible' }],
     visibilityPage: 'Schedules',
   },
   {
@@ -99,7 +99,7 @@ export const DOCUMENTS: Document[] = [
     refs: [
       { page: 'calendar', dot: 'pdfHref' },
     ],
-    visibilityRef: { page: 'calendar', dot: 'pdfVisible' },
+    visibilityRefs: [{ page: 'calendar', dot: 'pdfVisible' }],
     visibilityPage: 'Calendar',
   },
   {
@@ -120,6 +120,11 @@ export const DOCUMENTS: Document[] = [
       { page: 'home',  dot: 'quickLinks.6.href' },
       { page: 'forms', dot: 'policies.4.href' },
     ],
+    visibilityRefs: [
+      { page: 'home',  dot: 'quickLinks.6.visible' },
+      { page: 'forms', dot: 'policies.4.visible' },
+    ],
+    visibilityPage: 'site',
   },
   {
     id: 'ad-book',
@@ -130,6 +135,11 @@ export const DOCUMENTS: Document[] = [
       { page: 'home',  dot: 'quickLinks.7.href' },
       { page: 'forms', dot: 'policies.5.href' },
     ],
+    visibilityRefs: [
+      { page: 'home',  dot: 'quickLinks.7.visible' },
+      { page: 'forms', dot: 'policies.5.visible' },
+    ],
+    visibilityPage: 'site',
   },
   {
     id: 'locker-room-policy',

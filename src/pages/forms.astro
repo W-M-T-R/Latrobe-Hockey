@@ -75,7 +75,7 @@ const iconPaths: Record<string, string> = {
       <div class="flex items-center gap-3 mb-4"><span class="accent-bar"></span><span class="text-xs font-semibold uppercase tracking-[0.3em] text-wildcat-orange">Policies</span></div>
       <h2 class="section-title mb-8">Safety & Policy Documents</h2>
       <div class="grid sm:grid-cols-3 gap-5">
-        {forms.policies.map((p: any) => (
+        {forms.policies.filter((p: any) => p.visible !== false && (p.href ?? '').trim() !== '').map((p: any) => (
           <a href={p.href} target="_blank" rel="noopener" class="card card-hover group">
             <div class="flex items-center gap-3">
               <span class="h-10 w-10 rounded-lg bg-wildcat-orange/15 text-wildcat-orange flex items-center justify-center group-hover:bg-wildcat-orange group-hover:text-white transition">
