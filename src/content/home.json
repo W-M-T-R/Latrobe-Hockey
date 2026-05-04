@@ -65,6 +65,20 @@
       "href": "",
       "icon": "calendar",
       "visible": false
+    },
+    {
+      "title": "Golf Outing",
+      "blurb": "Annual fundraiser tournament — sign up or sponsor.",
+      "href": "/images/GolfOuting.pdf",
+      "icon": "ticket",
+      "visible": true
+    },
+    {
+      "title": "Ad Book Fundraiser",
+      "blurb": "Sell ads to local businesses for player credit.",
+      "href": "/images/AdBookFundraiser-2026-27.pdf",
+      "icon": "clipboard",
+      "visible": true
     }
   ],
   "highlights": [

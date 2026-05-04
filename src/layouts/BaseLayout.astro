@@ -14,7 +14,8 @@ const fullTitle = title ? `${title} · ${site.shortName}` : site.name;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <link rel="icon" type="image/png" href={site.logo} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/png" href={site.logo} />
     <title>{fullTitle}</title>
     {description && <meta name="description" content={description} />}
     <meta property="og:title" content={fullTitle} />

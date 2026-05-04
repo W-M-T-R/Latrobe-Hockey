@@ -236,8 +236,22 @@ const mode = persistMode();
           <div id="summer-ice-status" class="mt-1 text-xs text-white/60">Skip if you don't have it yet — you can upload it later from the Documents list.</div>
         </div>
 
+        <div>
+          <div class="text-xs uppercase tracking-[0.25em] text-amber-300 mb-2">Step 3 · Optional</div>
+          <label class="block text-sm font-semibold mb-2">New Golf Outing flyer</label>
+          <input type="file" id="summer-golf-file" accept="application/pdf,.pdf,image/*" class="w-full text-sm" />
+          <div id="summer-golf-status" class="mt-1 text-xs text-white/60">Skip if you're not running the outing this year, or if details aren't ready.</div>
+        </div>
+
+        <div>
+          <div class="text-xs uppercase tracking-[0.25em] text-amber-300 mb-2">Step 4 · Optional</div>
+          <label class="block text-sm font-semibold mb-2">New Ad Book Fundraiser packet</label>
+          <input type="file" id="summer-adbook-file" accept="application/pdf,.pdf,image/*" class="w-full text-sm" />
+          <div id="summer-adbook-status" class="mt-1 text-xs text-white/60">Skip if not ready yet.</div>
+        </div>
+
         <div class="rounded-2xl border border-amber-400/40 bg-amber-400/5 p-5">
-          <div class="text-xs uppercase tracking-[0.25em] text-amber-300 mb-2">Step 3 · Confirm</div>
+          <div class="text-xs uppercase tracking-[0.25em] text-amber-300 mb-2">Step 5 · Confirm</div>
           <p class="text-sm text-white/90 leading-relaxed">
             <strong>Switching to summer mode will clear last season's:</strong>
           </p>
@@ -453,12 +467,17 @@ const mode = persistMode();
     const $summerOpen = document.getElementById('open-summer') as HTMLButtonElement;
     const $summerPacket = document.getElementById('summer-packet-file') as HTMLInputElement;
     const $summerIce = document.getElementById('summer-ice-file') as HTMLInputElement;
+    const $summerGolf = document.getElementById('summer-golf-file') as HTMLInputElement;
+    const $summerAdbook = document.getElementById('summer-adbook-file') as HTMLInputElement;
     const $summerPacketStatus = document.getElementById('summer-packet-status') as HTMLDivElement;
     const $summerIceStatus = document.getElementById('summer-ice-status') as HTMLDivElement;
+    const $summerGolfStatus = document.getElementById('summer-golf-status') as HTMLDivElement;
+    const $summerAdbookStatus = document.getElementById('summer-adbook-status') as HTMLDivElement;
 
     $summerOpen?.addEventListener('click', () => {
       $summerCb.checked = false; $summerGo.disabled = true;
       $summerPacket.value = ''; $summerIce.value = '';
+      $summerGolf.value = ''; $summerAdbook.value = '';
       $summerDialog.showModal();
     });
     $summerCancel?.addEventListener('click', () => $summerDialog.close());
@@ -487,6 +506,16 @@ const mode = persistMode();
           $summerIceStatus.textContent = `Uploading ${$summerIce.files[0].name}…`;
           await uploadDoc('summer-ice-schedule', $summerIce.files[0]);
           $summerIceStatus.textContent = `✓ Uploaded.`;
+        }
+        if ($summerGolf.files?.[0]) {
+          $summerGolfStatus.textContent = `Uploading ${$summerGolf.files[0].name}…`;
+          await uploadDoc('golf-outing', $summerGolf.files[0]);
+          $summerGolfStatus.textContent = `✓ Uploaded.`;
+        }
+        if ($summerAdbook.files?.[0]) {
+          $summerAdbookStatus.textContent = `Uploading ${$summerAdbook.files[0].name}…`;
+          await uploadDoc('ad-book', $summerAdbook.files[0]);
+          $summerAdbookStatus.textContent = `✓ Uploaded.`;
         }
         $summerGo.textContent = 'Switching…';
         const res = await fetch('/api/admin/transition', {

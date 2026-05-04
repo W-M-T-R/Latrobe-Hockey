@@ -28,9 +28,11 @@ export const POST: APIRoute = async ({ request }) => {
 
       const home = await loadContent<any>('home');
       const ql = home.quickLinks ?? [];
-      // Show registration packet + summer ice (slots 0, 1)
+      // Show registration packet + summer ice (slots 0, 1) and the two summer fundraisers (slots 6, 7)
       if (ql[0]) ql[0].visible = true;
       if (ql[1]) ql[1].visible = true;
+      if (ql[6]) ql[6].visible = true;
+      if (ql[7]) ql[7].visible = true;
       // Hide and clear rosters + schedules (slots 2-5)
       for (let i = 2; i <= 5; i++) {
         if (ql[i]) {
@@ -45,9 +47,11 @@ export const POST: APIRoute = async ({ request }) => {
     if (action === 'switch-to-season') {
       const home = await loadContent<any>('home');
       const ql = home.quickLinks ?? [];
-      // Hide registration packet + summer ice (slots 0, 1)
+      // Hide registration packet + summer ice + summer fundraisers (slots 0, 1, 6, 7)
       if (ql[0]) ql[0].visible = false;
       if (ql[1]) ql[1].visible = false;
+      if (ql[6]) ql[6].visible = false;
+      if (ql[7]) ql[7].visible = false;
       // Show rosters + schedules (slots 2-5)
       for (let i = 2; i <= 5; i++) {
         if (ql[i]) ql[i].visible = true;

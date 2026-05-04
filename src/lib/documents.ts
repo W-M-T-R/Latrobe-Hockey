@@ -112,6 +112,26 @@ export const DOCUMENTS: Document[] = [
     ],
   },
   {
+    id: 'golf-outing',
+    label: 'Golf Outing',
+    description: 'Annual fundraiser tournament details.',
+    group: 'season',
+    refs: [
+      { page: 'home',  dot: 'quickLinks.6.href' },
+      { page: 'forms', dot: 'policies.4.href' },
+    ],
+  },
+  {
+    id: 'ad-book',
+    label: 'Ad Book Fundraiser',
+    description: 'Player ad-sales fundraiser packet.',
+    group: 'season',
+    refs: [
+      { page: 'home',  dot: 'quickLinks.7.href' },
+      { page: 'forms', dot: 'policies.5.href' },
+    ],
+  },
+  {
     id: 'locker-room-policy',
     label: 'Locker Room Policy',
     description: 'GLHC locker room safety guidelines.',
@@ -165,4 +185,6 @@ export const HOMEPAGE_SLOTS: { documentId: string; quickLinkIndex: number }[] = 
   { documentId: 'schedule-varsity', quickLinkIndex: 3 },
   { documentId: 'schedule-jv', quickLinkIndex: 4 },
   { documentId: 'schedule-ms', quickLinkIndex: 5 },
+  { documentId: 'golf-outing', quickLinkIndex: 6 },
+  { documentId: 'ad-book', quickLinkIndex: 7 },
 ];
