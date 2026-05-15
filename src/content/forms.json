@@ -4,12 +4,12 @@
     "title": "Registration & Forms",
     "subtitle": "Everything you need to register, try out, and play this season."
   },
-  "intro": "Below are the official registration documents and supporting forms for the upcoming season. The 2025–2026 Registration Packet contains every form a player and parent needs.",
+  "intro": "Below are the official registration documents and supporting forms for the upcoming season. The 2026–2027 Registration Packet contains every form a player and parent needs.",
   "primary": [
     {
-      "title": "Registration Packet 2025–2026",
+      "title": "Registration Packet 2026–2027",
       "blurb": "All player and parent forms in one PDF.",
-      "href": "https://nebula.wsimg.com/df5a493fb36917ae85992a14373c49cd?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1",
+      "href": "/images/Hockey-Packet.pdf",
       "kind": "PDF",
       "icon": "clipboard"
     },
@@ -21,7 +21,7 @@
       "icon": "sun"
     }
   ],
-  "packetPdfHref": "https://nebula.wsimg.com/df5a493fb36917ae85992a14373c49cd?AccessKeyId=22D26AFF30BB33CC3C38&disposition=0&alloworigin=1",
+  "packetPdfHref": "/images/Hockey-Packet.pdf",
   "packetIncludes": [
     {
       "label": "Registration Cover Letter",
